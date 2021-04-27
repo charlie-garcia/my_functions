@@ -1,0 +1,8 @@
+# Ignore the build directory
+/dist
+/build
+/mf.egg-info
+
+# Ignore logs
+logs
+*.log
