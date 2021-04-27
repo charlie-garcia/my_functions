@@ -276,6 +276,7 @@ def areaTriangle(x,y):
     area = 1/2 * np.abs( x[0] * ( y[1]-y[2] ) + x[1] * ( y[2]-y[0] ) + x[2] * ( y[0]-y[1] ) )
     return area
 
+
 def getCenters(x,y,z):
     lv = x.shape[0]
     cx, cy, cz,area = (np.zeros((lv,1)) for i in range(4))

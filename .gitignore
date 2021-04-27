@@ -2,6 +2,7 @@
 /dist
 /build
 /mf.egg-info
+mf/__pycache__/
 
 # Ignore logs
 logs
