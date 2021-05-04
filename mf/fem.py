@@ -9,13 +9,7 @@ def fem2cart(V, u, mesh, npoints, offset):
     nodal_values_u = u.vector()
     array_u = np.array(nodal_values_u)
     
-    # Acces to coordinates
-    n = V.dim()                                                                      
-    d = mesh.geometry().dim()                                                        
-    dof_coordinates = V.tabulate_dof_coordinates().reshape(n,d)
-    
-    xx = dof_coordinates[:,0]
-    yy = dof_coordinates[:,1]
+    xx, yy = node2coord(V,mesh)
 
     [X, Y] = np.meshgrid (np.linspace(np.min(xx)-offset, np.max(xx) + offset, npoints), 		
                          np.linspace(np.min(yy)-offset, np.max(yy)+offset,npoints) )
@@ -23,10 +17,7 @@ def fem2cart(V, u, mesh, npoints, offset):
     
     return X,Y,Z, xx, yy
 
-def fem2coord(V, u, mesh):
-    nodal_values_u = u.vector()
-    array_u = np.array(nodal_values_u)
-    
+def node2coord(V, mesh):
     # Acces to coordinates
     n = V.dim()                                                                      
     d = mesh.geometry().dim()                                                        
@@ -56,12 +47,7 @@ def eig2cart(eig_vec, V, mesh, npoints, offset):
     array_u = eig_vec[:]
     
     # Acces to coordinates
-    n = V.dim()                                                                      
-    d = mesh.geometry().dim()                                                        
-    dof_coordinates = V.tabulate_dof_coordinates().reshape(n,d)
-    
-    xx = dof_coordinates[:,0]
-    yy = dof_coordinates[:,1]
+    xx, yy = node2coord(V,mesh)
     
     [X, Y] = np.meshgrid(np.linspace(np.min(xx)-offset, np.max(xx) + offset, npoints), 	np.linspace(np.min(yy)-offset, np.max(yy)+offset,npoints));
     mode = inter.griddata(dof_coordinates,array_u,(X,Y), method = 'cubic')
@@ -165,7 +151,7 @@ def gmsh2dolfin_subd(path, mesh_name, dim, bord_string_tag, surface_string_tag):
     #
     fmesh = Mesh()
     
-    with XDMFFile(path + dom_mesh_name_xdmf) as infile:
+    9with XDMFFile(path + dom_mesh_name_xdmf) as infile:
         infile.read(fmesh)
     
     mvc_border = MeshValueCollection("size_t", fmesh, 1)
