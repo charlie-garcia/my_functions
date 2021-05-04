@@ -151,7 +151,7 @@ def gmsh2dolfin_subd(path, mesh_name, dim, bord_string_tag, surface_string_tag):
     #
     fmesh = Mesh()
     
-    9with XDMFFile(path + dom_mesh_name_xdmf) as infile:
+    with XDMFFile(path + dom_mesh_name_xdmf) as infile:
         infile.read(fmesh)
     
     mvc_border = MeshValueCollection("size_t", fmesh, 1)
