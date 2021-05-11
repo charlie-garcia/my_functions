@@ -1,7 +1,4 @@
-import gmsh
-import sys
-import numpy as np
-import meshio
+import gmsh, sys, meshio 
 import numpy as np
 from mf.fem import gmsh2dolfin, gmsh2dolfin_subd
 
@@ -217,7 +214,95 @@ def GetRandomPointExcitation(Npts, Lx, Ly, d2boundary, d2source):
     return px, py, circles
 
 
+def CreateComplexPate(mesh_name, Lx, Ly, coeff, loc_pts, exc_points):
+    import gmsh, sys
+    # Mesh generation with GMSH
+    gmsh.initialize(sys.argv)
 
+    # Ask GMSH to display information in the terminal
+    gmsh.option.setNumber("General.Terminal", 1)
+    gmsh.model.add(mesh_name)
+
+    model = gmsh.model
+    model.add("MyPlate")
+
+    # Create Rectangle
+    bx = [0,Lx, Lx, 0]
+    by = [0, 0, Ly, Ly]
+    vertex, borders, ptA, ptB = ( [] for i in range(4))
+
+    for j in range(len(bx)):
+        vertex.append(model.geo.addPoint( bx[j], by[j], 0, h1))
+
+    for j in range(len(bx)):
+        if j < len(bx):
+            borders.append(gmsh.model.geo.addLine(vertex[j-1],vertex[j]))
+
+    # Curveloop and Surface
+    curveloop = model.geo.addCurveLoop(borders)
+    id_surface = model.geo.addPlaneSurface([curveloop])
+    
+        
+    # This command is mandatory and synchronize CAD with GMSH Model. The less you launch it, the better it is for performance purpose
+    gmsh.model.geo.synchronize()
+
+    # Add fixed points 
+    loc_x = loc_pts[:,0]
+    loc_y = loc_pts[:,1]
+
+    l = []
+    tol = 1e-4
+    for j in range(len(loc_x)):
+        ptA.append(model.geo.addPoint( loc_x[j],     loc_y[j],     0, h1))
+        ptB.append(model.geo.addPoint( loc_x[j]+tol, loc_y[j]+tol, 0, h1))
+        l.append(model.geo.addLine(ptA[j], ptB[j]))
+
+    gmsh.model.geo.synchronize()
+
+    for j in range(len(l)):
+        gmsh.model.mesh.embed(1, [l[j]], 2, id_surface)   
+
+    # Embedded ponts into the surface
+    px = exc_points[:,0]
+    py = exc_points[:,1]
+    points = []
+    
+    for j in range(len(px)):
+        points.append(model.geo.addPoint(px[j], py[j], 0, h1))
+
+    gmsh.model.geo.synchronize()
+    gmsh.model.mesh.embed(0, points, 2, id_surface)             # dim =1, line  
+    
+    # set algorithm "Packing of parallelograms" (experimental =9)
+    gmsh.model.mesh.setAlgorithm(2, id_surface, 9)
+    gmsh.option.setNumber('Mesh.MeshSizeFactor', coeff)
+    gmsh.model.mesh.generate(2)                                 # 2D mesh
+
+    #% Add physical groups
+    # Bord phisical group
+    line_string_tag = "border"
+    tag_border = gmsh.model.addPhysicalGroup(1, borders)         
+    gmsh.model.setPhysicalName(1, tag_border, line_string_tag)   # dim, tag, name
+
+    # # Fixed point phisical group
+    tag_points = []
+    for ii in range(len(l)):
+        tag_points.append(gmsh.model.addPhysicalGroup(1, [l[ii]]))              # REMEMBER THIS TAG FOR BC
+        gmsh.model.setPhysicalName(1, tag_points[ii], line_string_tag)   # dim, tag, name
+
+    # Surface phisical group
+    surface_string_tag = "surface"
+    tag_dom = gmsh.model.addPhysicalGroup(2, [id_surface])       # Delete original tag when fragment
+    gmsh.model.setPhysicalName(2, tag_dom, surface_string_tag)   # dim, tag, name
+
+    gmsh.write(my_path+mesh_name)
+    # gmsh.fltk.run()
+    
+    gmsh.finalize()
+
+    fmesh, boundaries = gmsh2dolfin(my_path, mesh_name, dim, line_string_tag, surface_string_tag)
+
+    return fmesh, boundaries, tag_border, tag_points
 
 
 
