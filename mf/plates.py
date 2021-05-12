@@ -229,6 +229,8 @@ def CreateComplexPate(my_path, mesh_name, Lx, Ly, coeff, loc_pts, exc_points):
     bx = [0,Lx, Lx, 0]
     by = [0, 0, Ly, Ly]
     h1  = 0.08
+    dim = '2D'
+    
     vertex, borders, ptA, ptB = ( [] for i in range(4))
 
     for j in range(len(bx)):
