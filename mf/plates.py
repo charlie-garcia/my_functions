@@ -9,7 +9,7 @@ def CreatePlate(mesh_name, Lx, Ly, pxy, h1, dim, plot_info):
     # Ask GMSH to display information in the terminal
     gmsh.option.setNumber("General.Terminal", 1)
     gmsh.model.add(mesh_name)
-    
+    h1  = 0.08
     model = gmsh.model
     model.add("MyPlate")
     
