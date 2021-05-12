@@ -9,7 +9,6 @@ def CreatePlate(mesh_name, Lx, Ly, pxy, h1, dim, plot_info):
     # Ask GMSH to display information in the terminal
     gmsh.option.setNumber("General.Terminal", 1)
     gmsh.model.add(mesh_name)
-    h1  = 0.08
     model = gmsh.model
     model.add("MyPlate")
     
@@ -229,6 +228,7 @@ def CreateComplexPate(mesh_name, Lx, Ly, coeff, loc_pts, exc_points):
     # Create Rectangle
     bx = [0,Lx, Lx, 0]
     by = [0, 0, Ly, Ly]
+    h1  = 0.08
     vertex, borders, ptA, ptB = ( [] for i in range(4))
 
     for j in range(len(bx)):
