@@ -213,7 +213,7 @@ def GetRandomPointExcitation(Npts, Lx, Ly, d2boundary, d2source):
     return px, py, circles
 
 
-def CreateComplexPate(mesh_name, Lx, Ly, coeff, loc_pts, exc_points):
+def CreateComplexPate(my_path, mesh_name, Lx, Ly, coeff, loc_pts, exc_points):
     import gmsh, sys
     # Mesh generation with GMSH
     gmsh.initialize(sys.argv)
