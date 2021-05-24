@@ -13,7 +13,7 @@ def fem2cart(V, u, mesh, npoints, offset):
 
     [X, Y] = np.meshgrid (np.linspace(np.min(xx)-offset, np.max(xx) + offset, npoints), 		
                          np.linspace(np.min(yy)-offset, np.max(yy)+offset,npoints) )
-    Z = inter.griddata(dof_coordinates,array_u,(X,Y), method = 'cubic')
+    Z = inter.griddata(np.c_[xx,yy], array_u,(X,Y), method = 'cubic')
     
     return X,Y,Z, xx, yy
 
@@ -95,7 +95,7 @@ def gmsh2dolfin(path, mesh_name, dim, bord_string_tag, surface_string_tag):
         return mesh_new
     
     border_mesh_name_xdmf = "border_fmv.xdmf"
-    dom_mesh_name_xdmf = "domains_fmesh.xdmf"
+    dom_mesh_name_xdmf = domains_fmesh.xdmf"
     
     line_border_mesh = create_mesh(my_mesh, "line", bord_string_tag, prune_z=set_prune_z)
     meshio.write(path + border_mesh_name_xdmf, line_border_mesh)
@@ -140,7 +140,7 @@ def gmsh2dolfin_subd(path, mesh_name, dim, bord_string_tag, surface_string_tag):
         return mesh_new
     
     border_mesh_name_xdmf = "border_fmv.xdmf"
-    dom_mesh_name_xdmf = "domains_fmesh.xdmf"
+    dom_mesh_name_xdmf = domains_fmesh.xdmf"
     
     line_border_mesh = create_mesh(my_mesh, "line", bord_string_tag, prune_z=set_prune_z)
     meshio.write(path + border_mesh_name_xdmf, line_border_mesh)

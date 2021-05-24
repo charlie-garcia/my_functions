@@ -8,62 +8,64 @@ def set_fontsize(N):
 
 def PlotSettings(fig,ax):
     from mf.math import check_array
-
-    fig.set_facecolor('#19232d')
+    dark_color = '#19232d'
+    clear_color = '#C0C0C0'
+    fig.set_facecolor(dark_color)
         
     if check_array(ax) is True:
         cc = get_axes_coord(ax)
         idx=0
         nlen = ax.size
         for ii in range(0, nlen):
-            ax[cc[idx]].set_facecolor('#19232d')
-            ax[cc[idx]].tick_params(color='#C0C0C0', labelcolor='w')
+            ax[cc[idx]].set_facecolor(dark_color)
+            ax[cc[idx]].tick_params(color=clear_color, labelcolor=clear_color)
             # We change the fontsize of minor ticks label 
             ax[cc[idx]].tick_params(axis='both', which='major', labelsize=7)
             ax[cc[idx]].tick_params(axis='both', which='minor', labelsize=6)
-            ax[cc[idx]].xaxis.label.set_color('w')
-            ax[cc[idx]].yaxis.label.set_color('w')
+            ax[cc[idx]].xaxis.label.set_color(clear_color)
+            ax[cc[idx]].yaxis.label.set_color(clear_color)
             if hasattr(ax[cc[idx]], 'get_zlim'): 
-                ax[cc[idx]].zaxis.label.set_color('w')
+                ax[cc[idx]].zaxis.label.set_color(clear_color)
 
-            ax[cc[idx]].title.set_color('w')
+            ax[cc[idx]].title.set_color(clear_color)
             # set imshow outline
             for spine in ax[cc[idx]].spines.values():
-                spine.set_edgecolor('w') 
+                spine.set_edgecolor(clear_color) 
 
             idx=idx+1
 
     elif isinstance(ax, list) is True:
         nlen = len(ax)
         for ii in range(0, nlen):
-            ax[ii].set_facecolor('#19232d')
-            ax[ii].tick_params(color='#C0C0C0', labelcolor='w')
+            ax[ii].set_facecolor(dark_color)
+            ax[ii].tick_params(color= clear_color, labelcolor=clear_color)
             # We change the fontsize of minor ticks label 
             ax[ii].tick_params(axis='both', which='major', labelsize=7)
             ax[ii].tick_params(axis='both', which='minor', labelsize=6)
-            ax[ii].xaxis.label.set_color('w')
-            ax[ii].yaxis.label.set_color('w')
+            ax[ii].xaxis.label.set_color(clear_color)
+            ax[ii].yaxis.label.set_color(clear_color)
             if hasattr(ax[ii], 'get_zlim'): 
-                ax[ii].zaxis.label.set_color('w')
-            ax[ii].title.set_color('w')
+                ax[ii].zaxis.label.set_color(clear_color)
+            ax[ii].title.set_color(clear_color)
             for spine in ax[ii].spines.values():
-                spine.set_edgecolor('w') 
+                spine.set_edgecolor(clear_color) 
     else:        
-        ax.set_facecolor('#19232d')
-        ax.tick_params(color='#C0C0C0', labelcolor='w')
         # We change the fontsize of minor ticks label 
-        set_axis_parameters(ax)
+        set_axis_parameters(ax, dark_color, clear_color)
 
-def set_axis_parameters(ax):
+def set_axis_parameters(ax, dcolor, ccolor):
+    ax.set_facecolor(dcolor)
+    ax.tick_params(color='#C0C0C0', labelcolor=ccolor)
     ax.tick_params(axis='both', which='major', labelsize=7)
     ax.tick_params(axis='both', which='minor', labelsize=6)
-    ax.xaxis.label.set_color('w')
-    ax.yaxis.label.set_color('w')
+    ax.xaxis.label.set_color(ccolor)
+    ax.yaxis.label.set_color(ccolor)
     if hasattr(ax, 'get_zlim'): 
-            ax.zaxis.label.set_color('w')
-    ax.title.set_color('w')
+            ax.zaxis.label.set_color(ccolor)
+    ax.title.set_color(ccolor)
     for spine in ax.spines.values():
-        spine.set_edgecolor('w') 
+        spine.set_edgecolor(ccolor)
+        
         
 def PlotSettingsSmall(fig,ax):
     from mf.math import check_array
@@ -332,13 +334,13 @@ def plotFig(filename,fignr=1):
     for line in ax1.children:
         if line.type == 'graph2d.lineseries':
             if hasattr(line.properties,'Marker'):
-                mark = "%s" % line.properties.Marker
-                if(mark != "none"):
+                mark = "%s% line.properties.Marker
+                                if(mark != "none"):
                     mark = mark[0]
             else:
                 mark = '.'
             if hasattr(line.properties,'LineStyle'):
-                linestyle = "%s" % line.properties.LineStyle
+                linestyle = "%s% line.properties.LineStyle
             else:
                 linestyle = '-'
             if hasattr(line.properties,'Color'):
@@ -361,11 +363,11 @@ def plotFig(filename,fignr=1):
                 plt.plot(x,y,marker=mark,linestyle=linestyle,color=[r,g,b],ms=marker_size)
         elif line.type == 'text':
             if counter == 0:
-                plt.xlabel("$%s$" % line.properties.String,fontsize =16)
+                plt.xlabel("$%s$% line.properties.String,fontsize =16)
             elif counter == 1:
-                plt.ylabel("$%s$" % line.properties.String,fontsize = 16)
+                plt.ylabel("$%s$% line.properties.String,fontsize = 16)
             elif counter == 3:
-                plt.title("$%s$" % line.properties.String,fontsize = 16)
+                plt.title("$%s$% line.properties.String,fontsize = 16)
             counter += 1        
     # plt.grid(ax1.properties.XGrid)
 
@@ -390,3 +392,43 @@ def plotFig(filename,fignr=1):
         plt.legend(leg_entries)#,loc=Mat2py[location])
     # plt.hold(False)
     plt.show()
+
+import mpld3
+from mpld3 import plugins, utils
+class HighlightLines(plugins.PluginBase):
+    # source : http://www.xavierdupre.fr/app/jupytalk/helpsphinx/notebooks/js_mpld3.html
+
+    """A plugin to highlight lines on hover"""
+
+    JAVASCRIPT = """
+    mpld3.register_plugin("linehighlight", LineHighlightPlugin);
+    LineHighlightPlugin.prototype = Object.create(mpld3.Plugin.prototype);
+    LineHighlightPlugin.prototype.constructor = LineHighlightPlugin;
+    LineHighlightPlugin.prototype.requiredProps = ["line_ids"];
+    LineHighlightPlugin.prototype.defaultProps = {alpha_bg:0.3, alpha_fg:1.0}
+    function LineHighlightPlugin(fig, props){
+        mpld3.Plugin.call(this, fig, props);
+    };
+
+    LineHighlightPlugin.prototype.draw = function(){
+      for(var i=0; i<this.props.line_ids.length; i++){
+         var obj = mpld3.get_element(this.props.line_ids[i], this.fig),
+             alpha_fg = this.props.alpha_fg;
+             alpha_bg = this.props.alpha_bg;
+         obj.elements()
+             .on("mouseover", function(d, i){
+                            d3.select(this).transition().duration(10)
+                              .style("stroke-opacity", alpha_fg); })
+             .on("mouseout", function(d, i){
+                            d3.select(this).transition().duration(100)
+                              .style("stroke-opacity", alpha_bg); });
+      }
+    };
+    """
+
+    def __init__(self, lines):
+        self.lines = lines
+        self.dict_ = {"type": "linehighlight",
+                      "line_ids": [utils.get_id(line) for line in lines],
+                      "alpha_bg": lines[0].get_alpha(),
+                      "alpha_fg": 1.0}
