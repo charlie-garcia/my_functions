@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate as inter
+import matplotlib as mpl
 # from fenics import *
 
 def set_fontsize(N):
