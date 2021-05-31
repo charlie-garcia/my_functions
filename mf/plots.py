@@ -56,7 +56,7 @@ def PlotSettings(fig,ax):
 
 def set_axis_parameters(ax, dcolor, ccolor):
     ax.set_facecolor(dcolor)
-    ax.tick_params(color='#C0C0C0', labelcolor=ccolor)
+    ax.tick_params(color=ccolor, labelcolor=ccolor)
     ax.tick_params(axis='both', which='major', labelsize=7)
     ax.tick_params(axis='both', which='minor', labelsize=6)
     ax.xaxis.label.set_color(ccolor)
