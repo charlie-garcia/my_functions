@@ -18,38 +18,40 @@ def PlotSettings(fig,ax):
         idx=0
         nlen = ax.size
         for ii in range(0, nlen):
-            ax[cc[idx]].set_facecolor(dark_color)
-            ax[cc[idx]].tick_params(color=clear_color, labelcolor=clear_color)
-            # We change the fontsize of minor ticks label 
-            ax[cc[idx]].tick_params(axis='both', which='major', labelsize=7)
-            ax[cc[idx]].tick_params(axis='both', which='minor', labelsize=6)
-            ax[cc[idx]].xaxis.label.set_color(clear_color)
-            ax[cc[idx]].yaxis.label.set_color(clear_color)
-            if hasattr(ax[cc[idx]], 'get_zlim'): 
-                ax[cc[idx]].zaxis.label.set_color(clear_color)
+            set_axis_parameters(ax[cc[idx]], dark_color, clear_color)
+            #ax[cc[idx]].set_facecolor(dark_color)
+            #ax[cc[idx]].tick_params(color=clear_color, labelcolor=clear_color)
+            ## We change the fontsize of minor ticks label 
+            #ax[cc[idx]].tick_params(axis='both', which='major', labelsize=7)
+            #ax[cc[idx]].tick_params(axis='both', which='minor', labelsize=6)
+            #ax[cc[idx]].xaxis.label.set_color(clear_color)
+            #ax[cc[idx]].yaxis.label.set_color(clear_color)
+            #if hasattr(ax[cc[idx]], 'get_zlim'): 
+            #    ax[cc[idx]].zaxis.label.set_color(clear_color)
 
-            ax[cc[idx]].title.set_color(clear_color)
-            # set imshow outline
-            for spine in ax[cc[idx]].spines.values():
-                spine.set_edgecolor(clear_color) 
+            #ax[cc[idx]].title.set_color(clear_color)
+            ## set imshow outline
+            #for spine in ax[cc[idx]].spines.values():
+            #    spine.set_edgecolor(clear_color) 
 
             idx=idx+1
 
     elif isinstance(ax, list) is True:
         nlen = len(ax)
         for ii in range(0, nlen):
-            ax[ii].set_facecolor(dark_color)
-            ax[ii].tick_params(color= clear_color, labelcolor=clear_color)
-            # We change the fontsize of minor ticks label 
-            ax[ii].tick_params(axis='both', which='major', labelsize=7)
-            ax[ii].tick_params(axis='both', which='minor', labelsize=6)
-            ax[ii].xaxis.label.set_color(clear_color)
-            ax[ii].yaxis.label.set_color(clear_color)
-            if hasattr(ax[ii], 'get_zlim'): 
-                ax[ii].zaxis.label.set_color(clear_color)
-            ax[ii].title.set_color(clear_color)
-            for spine in ax[ii].spines.values():
-                spine.set_edgecolor(clear_color) 
+            set_axis_parameters(ax[ii], dark_color, clear_color)
+            #ax[ii].set_facecolor(dark_color)
+            #ax[ii].tick_params(color= clear_color, labelcolor=clear_color)
+            ## We change the fontsize of minor ticks label 
+            #ax[ii].tick_params(axis='both', which='major', labelsize=7)
+            #ax[ii].tick_params(axis='both', which='minor', labelsize=6)
+            #ax[ii].xaxis.label.set_color(clear_color)
+            #ax[ii].yaxis.label.set_color(clear_color)
+            #if hasattr(ax[ii], 'get_zlim'): 
+            #    ax[ii].zaxis.label.set_color(clear_color)
+            #ax[ii].title.set_color(clear_color)
+            #for spine in ax[ii].spines.values():
+            #    spine.set_edgecolor(clear_color) 
     else:        
         # We change the fontsize of minor ticks label 
         set_axis_parameters(ax, dark_color, clear_color)
