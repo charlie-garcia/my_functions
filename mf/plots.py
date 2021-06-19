@@ -447,3 +447,22 @@ class HighlightLines(plugins.PluginBase):
                       "line_ids": [utils.get_id(line) for line in lines],
                       "alpha_bg": lines[0].get_alpha(),
                       "alpha_fg": 1.0}
+
+def SetupPresentation(fontsize):
+    from matplotlib import rc
+
+    rc('text', usetex=True)
+    default_dpi = plt.rcParams['figure.dpi']
+    plt.rcParams['figure.dpi'] = 12.5*fontsize
+    plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+    plt.rc('text', usetex=True)
+    plt.rc('xtick', labelsize=fontsize/1.2)
+    plt.rc('ytick', labelsize=fontsize/1.2)
+
+    plt.rcParams.update({
+        'font.size': fontsize/10,
+        "figure.facecolor":  "None",
+        "axes.facecolor":    "None",
+        "savefig.facecolor": "None",
+        "legend.facecolor":  "None"
+    })
