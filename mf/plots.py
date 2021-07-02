@@ -460,7 +460,7 @@ def SetupPresentation(fontsize):
     plt.rc('ytick', labelsize=fontsize/1.2)
 
     plt.rcParams.update({
-        'font.size': fontsize/10,
+        'font.size': fontsize,
         "figure.facecolor":  "None",
         "axes.facecolor":    "None",
         "savefig.facecolor": "None",
