@@ -50,7 +50,7 @@ def eig2cart(eig_vec, V, mesh, npoints, offset):
     xx, yy = node2coord(V,mesh)
     
     [X, Y] = np.meshgrid(np.linspace(np.min(xx)-offset, np.max(xx) + offset, npoints), 	np.linspace(np.min(yy)-offset, np.max(yy)+offset,npoints));
-    mode = inter.griddata(dof_coordinates,array_u,(X,Y), method = 'cubic')
+    mode = inter.griddata([xx, yy],array_u,(X,Y), method = 'cubic')
     
     return mode,xx,yy
 
@@ -95,7 +95,7 @@ def gmsh2dolfin(path, mesh_name, dim, bord_string_tag, surface_string_tag):
         return mesh_new
     
     border_mesh_name_xdmf = "border_fmv.xdmf"
-    dom_mesh_name_xdmf = domains_fmesh.xdmf"
+    dom_mesh_name_xdmf = "domains_fmesh.xdmf"
     
     line_border_mesh = create_mesh(my_mesh, "line", bord_string_tag, prune_z=set_prune_z)
     meshio.write(path + border_mesh_name_xdmf, line_border_mesh)
@@ -140,7 +140,7 @@ def gmsh2dolfin_subd(path, mesh_name, dim, bord_string_tag, surface_string_tag):
         return mesh_new
     
     border_mesh_name_xdmf = "border_fmv.xdmf"
-    dom_mesh_name_xdmf = domains_fmesh.xdmf"
+    dom_mesh_name_xdmf = "domains_fmesh.xdmf"
     
     line_border_mesh = create_mesh(my_mesh, "line", bord_string_tag, prune_z=set_prune_z)
     meshio.write(path + border_mesh_name_xdmf, line_border_mesh)
@@ -250,6 +250,27 @@ def getCentersTriangles(xx, yy, spl):
         se[jj] = np.sqrt( det(uv0)**2 + det(uv1)**2 + det(uv2)**2 ) /2
         
     return cs, se.reshape(len(cs),1)
+
+# def getCentersTriangles(xx, yy, spl):
+#     from scipy.linalg import det
+#     # get baricenters
+#     x, y = (np.zeros(( len(spl), 3)) for ii in range(2))
+#     for jj in range(0, len(spl)):
+#         x[jj] = xx[spl[jj,:]]
+#         y[jj] = yy[spl[jj,:]]
+
+#     cx = np.mean(x,1)
+#     cy = np.mean(y,1)
+#     cz = 0*cy
+#     cs = np.c_[cx, cy, cz]
+
+#     # get triangle areas
+#     se = np.zeros( (x.shape[0], ) )
+#     # A = (x1y2 + x2y3 + x3y1 – x1y3 – x2y1 – x3y2)/2.
+#     for jj in range(0, len(se)):
+#         se[jj] = np.sqrt( x[jj][0]* y[jj][1] + x[jj][1]* y[jj][2] + x[jj][2]* y[jj][0] -\
+#                           x[jj][0]* y[jj][2] - x[jj][1]* y[jj][0] + x[jj][2]* y[jj][1] ) /2 
+#     return cs, se
 
 def Clamped_Plate(W, w_, mesh, E_, nu_, t_, force, ds):
     tol = 1E-14
