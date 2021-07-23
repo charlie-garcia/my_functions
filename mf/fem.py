@@ -187,12 +187,7 @@ def connect_triangles_fem(V, u, mesh, element, plot_info):
         yy = mesh.coordinates()[:,1]
         coordinates = mesh.coordinates()
         
-    from scipy.spatial import Delaunay
-    
-    # get triangles
-    tri = Delaunay(coordinates)
-    spl = tri.simplices
-
+    spl = mesh.cells()
     cs, se = getCentersTriangles(xx,yy,spl)
 
     if plot_info=='plot':
@@ -207,17 +202,10 @@ def connect_triangles_grid(mesh, plot_info):
     xx = mesh.points[:,0] 
     yy = mesh.points[:,1] 
     coordinates = mesh.points[:,0:2] 
-    
-    from scipy.spatial import Delaunay
-    
-    # get triangles
-    tri = Delaunay(coordinates)
-    spl = tri.simplices
-
+    spl = mesh.cells()
     cs, se = getCentersTriangles(xx,yy,spl)
 
     if plot_info=='plot':
-        
         plt.triplot(xx, yy, tri.simplices)
         plt.plot(xx, yy, 'o')
         plt.plot(cs[:,0], cs[:,1], 'rx')
