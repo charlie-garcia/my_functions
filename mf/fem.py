@@ -192,7 +192,7 @@ def connect_triangles_fem(V, u, mesh, element, plot_info):
 
     if plot_info=='plot':
         import matplotlib.pyplot as plt
-        plt.triplot(xx, yy, tri.simplices)
+        plt.triplot(xx, yy, spl)
         plt.plot(xx, yy, 'o')
         plt.plot(cs[:,0], cs[:,1], 'rx')
 
