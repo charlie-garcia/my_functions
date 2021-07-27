@@ -449,17 +449,16 @@ class HighlightLines(plugins.PluginBase):
                       "alpha_fg": 1.0}
 
 def SetupPresentation(fontsize):
-    from matplotlib import rc
-
+    from matplotlib import rc, rcParams
+    # default_dpi = rcParams['figure.dpi']
+    rcParams['figure.dpi'] = 12.5*fontsize
+    rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
     rc('text', usetex=True)
-    default_dpi = plt.rcParams['figure.dpi']
-    plt.rcParams['figure.dpi'] = 12.5*fontsize
-    plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-    plt.rc('text', usetex=True)
-    plt.rc('xtick', labelsize=fontsize/1.2)
-    plt.rc('ytick', labelsize=fontsize/1.2)
+    rc('xtick', labelsize=fontsize/1.2)
+    rc('ytick', labelsize=fontsize/1.2)
+    rc('legend',fontsize=fontsize/2)
 
-    plt.rcParams.update({
+    rcParams.update({
         'font.size': fontsize,
         "figure.facecolor":  "None",
         "axes.facecolor":    "None",
