@@ -192,6 +192,15 @@ def MatrixRSparse(rho0,c0,k0,area,rij):
                                  *csr_matrix( sp.jv(1, (k0[iif]*ak) )/ (k0[iif]*ak)))).multiply(csr_matrix( np.sin(k0[iif]*(rij+rij.T))/(k0[iif]*(rij+rij.T)))),k=1) )
     return Rii, R_diag
 
+def VectorR(rho,c0,k0,A,rij):
+    import scipy.special as sp
+    import numpy as np
+    #Compute the Acoustical Resistance Radiation Vector
+    ai  = np.sqrt(A/np.pi)
+    Rii = rho*c0*A* ( 1 - sp.jv(1, (2*k0*ai) ) /(k0*ai) )
+
+    return Rii
+
 def distance3(cs,FieldPoint):
     r = np.zeros([cs.shape[0], FieldPoint.shape[0]], dtype=np.float32)
     for ii in range(FieldPoint.shape[0]):
