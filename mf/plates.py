@@ -306,6 +306,75 @@ def CreateComplexPate(my_path, mesh_name, Lx, Ly, coeff, loc_pts, exc_points):
 
     return fmesh, boundaries, tag_border, tag_points
 
+def AverageSigma():
+    path = '/home/carlos/dataPython/sigma_mn/' 
+     
+    # Initialize table to save computations
+    import tables as tb
+    M = 20
+    N = 20
+
+    Lx = 0.5
+    Ly = 0.6
+    t_ = 3e-3    
+
+    # We take constant material properties throughout the domain::
+    E_   = 7.1e10
+    nu_  = 0.23
+    D_   = E_*t_**3/(12*(1-nu_**2))
+    eta  = 0.1
+    rho  = 2700
+    mass = rho*Lx*Ly*t_
+
+    filename = path+'sigma_mn_'+str(M)+'_'+str(N)+'.h5'
+    h5 = tb.open_file(filename, 'r')
+
+    f  = (h5.root.frequency[:]).squeeze()
+    Nf = len(f)
+    c0 = 343.5  
+    k0 = 2*np.pi*f/c0
+    force_point = 1
+
+    #  Analytical Solution : Modes in SS Plate
+    Nm = M;                                 Nn = N
+    m  =  np.r_[1:Nm+1];                    n  =np.r_[1:Nn+1]
+    km = np.array([m*np.pi/Lx]);            kn = np.array([n*np.pi/Ly]);
+
+    mass_a   = rho*Lx*Ly*t_
+    wmn      = np. sqrt(D_/(rho*t_)) * (km.T**2+kn**2)
+
+    imn      = 0
+    omega_n  = np.zeros((M*N, 1))
+    sigma_mn = np.zeros((Nf,M*N))
+
+    for iim in range(M):
+        m = iim+1
+        for iin in range(N):
+            n = iin+1
+            omega_n[imn]    = wmn[iim, iin]
+            integral        = h5.root.integral_mn[:,iim,iin]
+            sigma_mn[:,imn] = 64*k0**2*Lx*Ly / (np.pi**6 * m**2 * n**2) * integral
+            imn+=1
+
+    print(sigma_mn.shape)  
+
+    om = 2*np.pi*f.reshape(1,Nf)
+
+    v4m = force_point**2*om**2/(2*mass**2) *1/((omega_n**2 - om**2)**2 + eta**2*omega_n**4)
+    v2m = np.sum(v4m,axis=0)
+    sigma = np.real( np.sum(sigma_mn*v4m.T,axis=1) / np.sum(v4m,axis=0))
+    h5.close()
+    return f, sigma
+
+
+
+
+
+
+
+
+
+
 
 
 
