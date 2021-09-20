@@ -23,8 +23,8 @@ def node2coord(V, mesh):
     d = mesh.geometry().dim()                                                        
     dof_coordinates = V.tabulate_dof_coordinates().reshape(n,d)
     
-    xx = np.float64(dof_coordinates[:,0])
-    yy = np.float64(dof_coordinates[:,1])
+    xx = dof_coordinates[:,0]
+    yy = dof_coordinates[:,1]
 
     return xx, yy
 
@@ -37,9 +37,9 @@ def fem3coord(V, u, mesh):
     d = mesh.geometry().dim()                                                        
     dof_coordinates = V.tabulate_dof_coordinates().reshape(n,d)
     
-    xx = np.float64(dof_coordinates[:,0])
-    yy = np.float64(dof_coordinates[:,1])   
-    zz = np.float64(dof_coordinates[:,2])
+    xx = dof_coordinates[:,0]
+    yy = dof_coordinates[:,1]    
+    zz = dof_coordinates[:,2]
     
     return xx, yy, zz
 
@@ -64,9 +64,9 @@ def fem3cart(V, u, mesh, npoints, offset):
     d = mesh.geometry().dim()                                                        
     dof_coordinates = V.tabulate_dof_coordinates().reshape(n,d)
     
-    xx = np.float64(dof_coordinates[:,0])
-    yy = np.float64(dof_coordinates[:,1])
-    zz = np.float64(dof_coordinates[:,2])
+    xx = dof_coordinates[:,0]
+    yy = dof_coordinates[:,1]
+    zz = dof_coordinates[:,2]
     
 
     [X, Y] = np.meshgrid(np.linspace(np.min(xx) - offset, np.max(xx) + offset, npoints),   \
@@ -178,8 +178,8 @@ def connect_triangles_fem(V, u, mesh, element, plot_info):
         n = V.dim()                                                     # n nodes
         d = mesh.geometry().dim()                                                        
         dof_coordinates = V.tabulate_dof_coordinates().reshape(n,d)
-        xx = np.float64(dof_coordinates[:,0])
-        yy = np.float64(dof_coordinates[:,1])
+        xx = dof_coordinates[:,0]
+        yy = dof_coordinates[:,1]
         coordinates = dof_coordinates
         
     elif element =='mesh':
