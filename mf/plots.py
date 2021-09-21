@@ -227,7 +227,7 @@ def connect_squares2D(x,y,N,idx,connect, plotInfo):
             plt.plot( [x[0, idx[connect[ii,2]] ], x[0, idx[connect[ii,3]] ] ], [y[0, idx[connect[ii,2]] ], y[0, idx[connect[ii,3]] ] ], ':', color=[.6,.6,.6], lw=0.5)
             plt.plot( [x[0, idx[connect[ii,3]] ], x[0, idx[connect[ii,0]] ] ], [y[0, idx[connect[ii,3]] ], y[0, idx[connect[ii,0]] ] ], ':', color=[.6,.6,.6], lw=0.5)
         
-        cs = np.c_[np.array(cx),np.array(cy)]
+    cs = np.c_[np.array(cx),np.array(cy)]
     return cs
 
 def create_plate2D(Lx,Ly,N,plot_info):
