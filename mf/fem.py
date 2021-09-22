@@ -173,6 +173,31 @@ def gmsh2dolfin_subd(path, mesh_name, dim, bord_string_tag, surface_string_tag):
     
     return fmesh, mf_boundary, mf_domains
 
+def gmsh2grid(path, mesh_name, bord_string_tag, surface_string_tag):
+    my_mesh = meshio.read(path+mesh_name)
+
+    def create_mesh(mesh, cell_type, my_tag, prune_z=True):  # Prune for 2D FEM
+        cells = np.vstack([cell.data for cell in mesh.cells if cell.type==cell_type])
+        cell_data = np.hstack([mesh.cell_data_dict["gmsh:physical"][key]
+                              for key in mesh.cell_data_dict["gmsh:physical"].keys() if key==cell_type])
+    
+        # Remove z-coordinates from mesh if we have a 2D cell and all points have the same third coordinate
+        points= mesh.points
+        if prune_z:
+            points = points[:,:2]
+        mesh_new = meshio.Mesh(points=points, cells={cell_type: cells}, cell_data={my_tag:[cell_data]})
+        return mesh_new
+    
+    dom_mesh_name_xdmf = "domains_fmesh.xdmf"
+    triangle_mesh = create_mesh(my_mesh, "triangle", surface_string_tag)  # Change to false if wanna 2D
+    meshio.write(path + dom_mesh_name_xdmf, triangle_mesh)
+
+    grid = Mesh()
+    with XDMFFile(path + dom_mesh_name_xdmf) as infile:
+        infile.read(grid)
+
+    return grid
+    
 def connect_triangles_fem(V, u, mesh, element, plot_info):
     if element == 'dof':
         n = V.dim()                                                     # n nodes
