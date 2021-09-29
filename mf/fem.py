@@ -227,7 +227,7 @@ def connect_triangles_grid(mesh, plot_info):
     xx = mesh.points[:,0] 
     yy = mesh.points[:,1] 
     coordinates = mesh.points[:,0:2] 
-    spl = mesh.cells()
+    spl = mesh.cells_dict['triangle']
     cs, se = getCentersTriangles(xx,yy,spl)
 
     if plot_info=='plot':
