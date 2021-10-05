@@ -500,7 +500,7 @@ def ComputeModesPlates(number_of_requested_eigenpairs, which_eig, J, W, w, w_t, 
             
             plt.sca(ax)
             PlotSettingsSmall(fig, ax)
-            im = plot(eig, cmap=my_map, title='Mode: %.f, freq:  %.2f Hz' %(nn, f), fontweight='bold')
+            im = plot(eig, cmap=my_map, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(nn, f))
             ax.set_aspect('equal', 'box')
             plt.draw()
             
