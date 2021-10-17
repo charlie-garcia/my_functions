@@ -120,6 +120,54 @@ def gmsh2dolfin(path, mesh_name, dim, bord_string_tag, surface_string_tag):
     
     return fmesh, mf
 
+def gmsh3dolfin(path, mesh_name):
+    
+    msh = meshio.read(path+mesh_name)
+
+    def create_mesh(mesh, cell_type):
+        cells = np.vstack([cell.data for cell in mesh.cells if cell.type==cell_type])
+        cell_data = np.hstack([mesh.cell_data_dict["gmsh:geometrical"][key]
+                              for key in mesh.cell_data_dict["gmsh:geometrical"].keys() if key==cell_type])
+        
+        mesh_new = meshio.Mesh(points=msh.points, cells={cell_type: cells}, cell_data={"name_to_read":[cell_data]})
+        return mesh_new
+    
+    surface_mesh_name_xdmf = "surface_fmesh.xdmf"
+    dom_mesh_name_xdmf     = "domains_fmesh.xdmf"
+    
+    triangle_mesh = create_mesh(msh, "triangle")            
+    meshio.write(path + surface_mesh_name_xdmf, triangle_mesh)
+    
+    tetra_mesh = create_mesh(msh, "tetra")            
+    meshio.write(path + dom_mesh_name_xdmf, triangle_mesh)
+    
+    meshio.write(path+"mesh.xdmf", meshio.Mesh(points=msh.points, cells={"tetra": 
+                    np.vstack([cell.data for cell in msh.cells if cell.type=="tetra"])}))
+        
+    fmesh = Mesh()
+    
+    with XDMFFile(path+"mesh.xdmf") as infile:
+        infile.read(fmesh)
+    
+    mvc = MeshValueCollection("size_t", fmesh, 2)
+    
+    with XDMFFile(path + surface_mesh_name_xdmf) as infile:
+        print("Reading 1d line data into dolfin mvc")
+        infile.read(mvc, "name_to_read")
+    
+    print("Constructing MeshFunction from MeshValueCollection")
+    
+    mf = MeshFunction('size_t', fmesh, mvc)
+     
+    mvc2 = MeshValueCollection("size_t", fmesh, 3)
+    
+    with XDMFFile(path + dom_mesh_name_xdmf) as infile:
+        infile.read(mvc, "name_to_read")
+        
+    cf = MeshFunction('size_t', fmesh, mvc2)
+
+    return fmesh, mf, cf
+
 def gmsh2dolfin_subd(path, mesh_name, dim, bord_string_tag, surface_string_tag):
     my_mesh = meshio.read(path+mesh_name)
     if dim=='2D':
