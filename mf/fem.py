@@ -621,3 +621,27 @@ def CreateMembrane(mesh_name, R, h, dim, plot_info):
     fmesh, mf = gmsh2dolfin('', mesh_name, dim, bord_string_tag, surface_string_tag)            
 
     return fmesh, mf, tag_bords
+
+
+def write_gmsh(path, mesh_name):
+    import os.path, gmsh
+    
+    if os.path.exists(path+mesh_name):
+        while True:
+            try:
+                overwrite = str(input("Existing file, wanna replace-it? [y/n]: "))
+            except ValueError:
+                print("Sorry, I didn't understand that.")                       # Return to the start of the loop
+                continue
+            else:
+                break                                                           #we're ready to exit the loop.
+
+        if 'y' in overwrite: 
+            gmsh.write(path+mesh_name)
+            print('Overwriting existing file')
+        else:
+            raise ValueError("Please change the name of the file")
+    
+    else:
+        print ("Creating new file")
+        gmsh.write(path+mesh_name)
