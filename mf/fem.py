@@ -629,7 +629,7 @@ def write_gmsh(path, mesh_name):
     if os.path.exists(path+mesh_name):
         while True:
             try:
-                overwrite = str(input("Existing file, wanna replace-it? [y/n]: "))
+                overwrite = str(input("Existing file, wanna replace-it? [y/n/c]: "))
             except ValueError:
                 print("Sorry, I didn't understand that.")                       # Return to the start of the loop
                 continue
@@ -639,6 +639,9 @@ def write_gmsh(path, mesh_name):
         if 'y' in overwrite: 
             gmsh.write(path+mesh_name)
             print('Overwriting existing file')
+        elif 'c' in overwrite:
+            print('Skipping mesh creation, using old mesh: '+mesh_name)
+
         else:
             raise ValueError("Please change the name of the file")
     
