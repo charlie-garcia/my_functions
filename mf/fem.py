@@ -334,16 +334,6 @@ def getCentersTriangles(xx, yy, spl):
 #     return cs, se
 
 def Clamped_Plate(W, w_, mesh, E_, nu_, t_, force, ds):
-    tol = 1E-14
-
-    class Omega_0(SubDomain):
-        def inside(self, x, on_boundary):
-            return x[1] <= 0.5 + tol
-    
-    class Omega_1(SubDomain):
-        def inside(self, x, on_boundary):
-            return x[1] >= 0.5 - tol
-        
     # We take constant material properties throughout the domain::
     E = Constant(E_)
     nu = Constant(nu_)
@@ -406,11 +396,7 @@ def Clamped_Plate(W, w_, mesh, E_, nu_, t_, force, ds):
             (1.0/2.0)*(alpha/h)*inner(inner(theta_effective, n), inner(theta_effective, n))*ds(1) 
     
     # The remainder of the demo is as usual::
-    
-    f = Constant(force)
-    W_ext = f*w_*dx
-    
-    L = psi_M*dx - W_ext + L_CDG + L_BC   
+    L = psi_M*dx + L_CDG + L_BC   
     
     return L
 
