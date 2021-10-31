@@ -213,99 +213,346 @@ def GetRandomPointExcitation(Npts, Lx, Ly, d2boundary, d2source):
     return px, py, circles
 
 
-def CreateComplexPate(my_path, mesh_name, Lx, Ly, coeff, loc_pts, exc_points):
+def ComplexPate(my_path, mesh_name, Lx, Ly, h1, loc_x, loc_y):
     import gmsh, sys
-    # Mesh generation with GMSH
+    from mf.fem import write_gmsh
+    from mf.fem import gmsh2dolfin
     gmsh.initialize(sys.argv)
-
-    # Ask GMSH to display information in the terminal
-    gmsh.option.setNumber("General.Terminal", 1)
-    gmsh.model.add(mesh_name)
-
+    gmsh.option.setNumber("General.Terminal", 1)        # Ask GMSH to display information in the terminal
+    
     model = gmsh.model
-    model.add("MyPlate")
-
+    model.add("complex_plate")
+    
     # Create Rectangle
-    bx = [0,Lx, Lx, 0]
-    by = [0, 0, Ly, Ly]
-    h1  = 0.08
-    dim = '2D'
+    dim    = '2D'                              
+    a_mass = 0.003                         # blocked surface radius
     
-    vertex, borders, ptA, ptB = ( [] for i in range(4))
-
-    for j in range(len(bx)):
-        vertex.append(model.geo.addPoint( bx[j], by[j], 0, h1))
-
-    for j in range(len(bx)):
-        if j < len(bx):
-            borders.append(gmsh.model.geo.addLine(vertex[j-1],vertex[j]))
-
-    # Curveloop and Surface
-    curveloop = model.geo.addCurveLoop(borders)
-    id_surface = model.geo.addPlaneSurface([curveloop])
+    # Create Polygon
+    N      = 8
+    alpha  = np.deg2rad(360/N)
+    phi    = alpha/2+np.pi/2
+    beta   = np.deg2rad(90) - alpha/2
+    l2     = a_mass*np.sin(alpha/2)/np.sin(beta)
     
+    # Create plate
+    rect         = gmsh.model.occ.addRectangle(0,0,0, Lx, Ly)
+    border_plate = [1,2,3,4]
+    
+    # all added circular of added mass
+    c      =  [0]*Nfx
+    vertex, borders = ( [] for i in range(2))
+    
+    for ii in range(Nfx):
+        c[ii] = gmsh.model.occ.addPoint(loc_x[ii], loc_y[ii], 0, h1)
         
-    # This command is mandatory and synchronize CAD with GMSH Model. The less you launch it, the better it is for performance purpose
-    gmsh.model.geo.synchronize()
-
-    # Add fixed points 
-    loc_x = loc_pts[:,0]
-    loc_y = loc_pts[:,1]
-
-    l = []
-    tol = 1e-4
-    for j in range(len(loc_x)):
-        ptA.append(model.geo.addPoint( loc_x[j],     loc_y[j],     0, h1))
-        ptB.append(model.geo.addPoint( loc_x[j]+tol, loc_y[j]+tol, 0, h1))
-        l.append(model.geo.addLine(ptA[j], ptB[j]))
-
-    gmsh.model.geo.synchronize()
-
-    for j in range(len(l)):
-        gmsh.model.mesh.embed(1, [l[j]], 2, id_surface)   
-
-    # Embedded ponts into the surface
-    px = exc_points[:,0]
-    py = exc_points[:,1]
-    points = []
+        vx, bs = ( [] for i in range(2))
+        for jj in range(N):
+            vx.append(model.occ.addPoint( a_mass*np.cos(2*np.pi*jj/N - phi) + loc_x[ii],\
+                                          a_mass*np.sin(2*np.pi*jj/N - phi) + loc_y[ii], 0, h1))
+        # connect borders
+        for j in range(N):
+            if j < N:
+                bs.append( gmsh.model.occ.addLine(vx[j-1], vx[j]))
+        
+        # connect inside triangles            
+        for j in range(N):
+            bs.append( gmsh.model.occ.addLine(vx[j], c[ii]))
     
-    for j in range(len(px)):
-        points.append(model.geo.addPoint(px[j], py[j], 0, h1))
-
-    gmsh.model.geo.synchronize()
-    gmsh.model.mesh.embed(0, points, 2, id_surface)             # dim =1, line  
+        vertex = vertex+vx
+        borders = borders+bs
     
-    # set algorithm "Packing of parallelograms" (experimental =9)
-    gmsh.model.mesh.setAlgorithm(2, id_surface, 9)
-    gmsh.option.setNumber('Mesh.MeshSizeFactor', coeff)
+    gmsh.model.occ.synchronize()
+    
+    gmsh.model.mesh.embed(0, vertex,  2, rect)             # dim =0, point in dim=2, surface
+    gmsh.model.mesh.embed(1, borders, 2, rect)             # dim =1, curve in dim=2, surface  
+    
+    # Append conectric points to redefine mesh
+    ixs = [3]
+    vx_out  = []
+    for ii in range(Nfx):
+        for jj in range(N):
+            for ix in ixs:
+                vx_out.append(model.occ.addPoint( ix*a_mass*np.cos(2*np.pi*jj/N - phi) + loc_x[ii],\
+                                                  ix*a_mass*np.sin(2*np.pi*jj/N - phi) + loc_y[ii], 0, h1))
+    
+    gmsh.model.occ.synchronize()
+    gmsh.model.mesh.embed(0, vx_out,  2, rect)              # dim =0, point in dim=2, surface
+    
+    gmsh.model.mesh.setAlgorithm(2, rect, 8)             # algorithm "Packing of parallelograms" (experimental =9)
+    gmsh.model.mesh.setSize(gmsh.model.getEntities(0), h1)
+    # gmsh.option.setNumber('Mesh.MeshSizeMin', h1)
     gmsh.model.mesh.generate(2)                                 # 2D mesh
-
-    #% Add physical groups
+    
     # Bord phisical group
-    line_string_tag = "border"
-    tag_border = gmsh.model.addPhysicalGroup(1, borders)         
+    line_string_tag = "border"                                  # all borders even inside
+    tag_border = gmsh.model.addPhysicalGroup(1, border_plate+borders)
     gmsh.model.setPhysicalName(1, tag_border, line_string_tag)   # dim, tag, name
-
-    # # Fixed point phisical group
-    tag_points = []
-    for ii in range(len(l)):
-        tag_points.append(gmsh.model.addPhysicalGroup(1, [l[ii]]))              # REMEMBER THIS TAG FOR BC
-        gmsh.model.setPhysicalName(1, tag_points[ii], line_string_tag)   # dim, tag, name
-
+    
+    # Ponint zones phisical group
+    # tag_points = [0]*(Nfx)
+    # len0=2*N
+    # for ii in range(Nfx):
+    #     tag_points[ii] = gmsh.model.addPhysicalGroup(1, borders[len0*(ii):len0*(ii+1)])    
+    #     gmsh.model.setPhysicalName(1, tag_points[ii], line_string_tag)   # dim, tag, name
+    
     # Surface phisical group
     surface_string_tag = "surface"
-    tag_dom = gmsh.model.addPhysicalGroup(2, [id_surface])       # Delete original tag when fragment
+    tag_dom = gmsh.model.addPhysicalGroup(2, [rect])       # Delete original tag when fragment
     gmsh.model.setPhysicalName(2, tag_dom, surface_string_tag)   # dim, tag, name
-
-    gmsh.write(my_path+mesh_name)
-    # gmsh.fltk.run()
+    
+    gmsh.fltk.run()
+    write_gmsh(my_path, mesh_name)
     
     gmsh.finalize()
+    
+    fmesh, mf_boundary = gmsh2dolfin(my_path, mesh_name, dim, line_string_tag, surface_string_tag)
+    
+    return fmesh, mf_boundary, tag_border
 
-    fmesh, boundaries = gmsh2dolfin(my_path, mesh_name, dim, line_string_tag, surface_string_tag)
+def Clamped_Plate(W, w_, mesh, E_, nu_, t_, ds, tag_bords):
+    # We take constant material properties throughout the domain::
+    E = Constant(E_)
+    nu = Constant(nu_)
+    t = Constant(t_)
+    
+    # Rotation \theta = \nabla w, which can be expressed in UFL as::
+    theta = grad(w_)
+    
+    # The bending tensor can then be calculated from the derived rotation field
+    #     k = \frac{1}{2}(\nabla \theta + (\nabla \theta)^T) 
+    k = variable(sym(grad(theta)))
+    
+    # Again, identically to the Reissner-Mindlin model we can calculate the bending
+    # energy density as::
+    D = (E*t**3)/(12.0*(1.0 - nu**2))
+    psi_M = 0.5*D*((1.0 - nu)*tr(k*k) + nu*(tr(k))**2)
+    
+    # Clamped Plate
+    # For the definition of the CDG stabilisation terms and the (weak) enforcement of
+    # the Dirichlet boundary conditions on the rotation field, we need to explicitly
+    # derive the moment tensor :math:`M`. Following standard arguments in elasticity,
+    #     M = \frac{\partial \psi_M}{\partial k}
+    M = diff(psi_M, k)
+    
+    # The Lagrangian formulation of the CDG stabilisation term is then:
+    #     L_{\mathrm{CDG}}(w) = \sum_{E \in \mathcal{E}_h^{\mathrm{int}}} \int_{E} - [\!\![ \theta ]\!\!]  \cdot \left< M \cdot (n \otimes n) \right > + \frac{1}{2} \frac{\alpha}{\left< h_E \right>} \left< \theta \cdot n \right> \cdot \left< \theta \cdot n \right> \; \mathrm{d}s
+    
+    # We choose the penalty parameter to be on the order of the norm of the bending stiffness matrix :math:`\dfrac{Et^3}{12}`.
+    
+    alpha = E*t**3
+    h = CellDiameter(mesh)
+    h_avg = (h('+') + h('-'))/2.0 
+    
+    n = FacetNormal(mesh)
+    
+    M_n = inner(M, outer(n, n))
+    
+    L_CDG = -inner(jump(theta, n), avg(M_n))*dS + \
+                (1.0/2.0)*(alpha('+')/h_avg)*inner(jump(theta, n), jump(theta, n))*dS
+    
 
-    return fmesh, boundaries, tag_border, tag_points
+    # In this example, we would like :math:`\theta_d = 0` everywhere on the boundary:: 
+     
+    theta_d = Constant((0.0, 0.0))                                                  # To impose non-homogeneous BC
+    # The definition of the exterior facets and Dirichlet rotation field were trivial
+    # in this demo, but you could extend this code straightforwardly to
+    # non-homogeneous Dirichlet conditions.
+    # 
+    # The weak boundary condition enforcement term can be written:
+    #
+    # .. math::
+    #     L_{\mathrm{BC}}(w) = \sum_{E \in \mathcal{E}_h^{\mathrm{D}}} \int_{E} - \theta_e  \cdot (M \cdot (n \otimes n))  + \frac{1}{2} \frac{\alpha}{h_E} (\theta_e \cdot n)  \cdot (\theta_e \cdot n)  \; \mathrm{d}s
+    # 
+    # where :math:`\theta_e = \theta - \theta_d` is the effective rotation field, and
+    # :math:`\mathcal{E}_h^{\mathrm{D}}` is the set of all exterior facets of the triangulation
+    # :math:`\mathcal{T}` where we would like to apply Dirichlet boundary conditions, or in UFL::
+    
+    theta_effective = theta - theta_d 
+    L_BC = -inner(inner(theta_effective, n), M_n)*ds(tag_bords) + \
+            (1.0/2.0)*(alpha/h)*inner(inner(theta_effective, n), inner(theta_effective, n))*ds(tag_bords) 
+    
+    # The remainder of the demo is as usual::
+    L = psi_M*dx + L_CDG + L_BC   
+    
+    return L
 
+def SS_Plate(W, w_, mesh, E_, nu_, t_):
+   
+    # We take constant material properties throughout the domain::
+    E = Constant(E_)
+    nu = Constant(nu_)
+    t = Constant(t_)
+    
+    # Rotation \theta = \nabla w, which can be expressed in UFL as::
+    theta = grad(w_)
+    
+    # The bending tensor can then be calculated from the derived rotation field
+    #     k = \frac{1}{2}(\nabla \theta + (\nabla \theta)^T) 
+    k = variable(sym(grad(theta)))
+    
+    # Again, identically to the Reissner-Mindlin model we can calculate the bending
+    # energy density as::
+    D = (E*t**3)/(12.0*(1.0 - nu**2))
+    psi_M = 0.5*D*((1.0 - nu)*tr(k*k) + nu*(tr(k))**2)
+    
+    # Clamped Plate
+    # For the definition of the CDG stabilisation terms and the (weak) enforcement of
+    # the Dirichlet boundary conditions on the rotation field, we need to explicitly
+    # derive the moment tensor :math:`M`. Following standard arguments in elasticity,
+    #     M = \frac{\partial \psi_M}{\partial k}
+    M = diff(psi_M, k)
+    
+    # The Lagrangian formulation of the CDG stabilisation term is then:
+    #     L_{\mathrm{CDG}}(w) = \sum_{E \in \mathcal{E}_h^{\mathrm{int}}} \int_{E} - [\!\![ \theta ]\!\!]  \cdot \left< M \cdot (n \otimes n) \right > + \frac{1}{2} \frac{\alpha}{\left< h_E \right>} \left< \theta \cdot n \right> \cdot \left< \theta \cdot n \right> \; \mathrm{d}s
+    
+    # We choose the penalty parameter to be on the order of the norm of the bending stiffness matrix :math:`\dfrac{Et^3}{12}`.
+    
+    alpha = E*t**3
+    h = CellDiameter(mesh)
+    h_avg = (h('+') + h('-'))/2.0 
+    
+    n = FacetNormal(mesh)
+    
+    M_n = inner(M, outer(n, n))
+    
+    L_CDG = -inner(jump(theta, n), avg(M_n))*dS + \
+                (1.0/2.0)*(alpha('+')/h_avg)*inner(jump(theta, n), jump(theta, n))*dS
+    
+
+    # In this example, we would like :math:`\theta_d = 0` everywhere on the boundary:: 
+     
+    # theta_d = Constant((0.0, 0.0))                                                  # To impose non-homogeneous BC
+    # The definition of the exterior facets and Dirichlet rotation field were trivial
+    # in this demo, but you could extend this code straightforwardly to
+    # non-homogeneous Dirichlet conditions.
+    # 
+    # The weak boundary condition enforcement term can be written:
+    #
+    # .. math::
+    #     L_{\mathrm{BC}}(w) = \sum_{E \in \mathcal{E}_h^{\mathrm{D}}} \int_{E} - \theta_e  \cdot (M \cdot (n \otimes n))  + \frac{1}{2} \frac{\alpha}{h_E} (\theta_e \cdot n)  \cdot (\theta_e \cdot n)  \; \mathrm{d}s
+    # 
+    # where :math:`\theta_e = \theta - \theta_d` is the effective rotation field, and
+    # :math:`\mathcal{E}_h^{\mathrm{D}}` is the set of all exterior facets of the triangulation
+    # :math:`\mathcal{T}` where we would like to apply Dirichlet boundary conditions, or in UFL::
+    
+    # theta_effective = theta - theta_d 
+    # L_BC = -inner(inner(theta_effective, n), M_n)*ds(1) + \
+    #         (1.0/2.0)*(alpha/h)*inner(inner(theta_effective, n), inner(theta_effective, n))*ds(1) 
+    
+    # The remainder of the demo is as usual::
+    L = psi_M*dx + L_CDG 
+    
+    return L
+
+def ComputeModesPlates(number_of_requested_eigenpairs, which_eig, J, W, w, w_t, rho, t, bcs_w, *arg):
+    
+    a = J
+    A2 = PETScMatrix()
+    assemble(a, tensor = A2)
+    
+    # # element dkt kirchhoff - love
+    L = rho*t*inner(w,w_t)*dx
+    B = PETScMatrix()
+    assemble(L, tensor = B)
+    
+    # code to check whether 
+    # object is a list or not 
+    if isinstance(bcs_w, list): 
+        bcs_w  = bcs_w
+    else:        
+        bcs_w  = [bcs_w]
+        
+    for bc in bcs_w:
+        bc.apply(A2)
+        bc.zero(B)                          # avoid spurius eig vals
+    # u = Function(V)
+    
+    # px = 0.1
+    # py = 0
+    #PointSource(V, Point(px,py), f).apply(B)           # See how to use the delta function instead
+    
+    # solve(A, u.vector(), b)
+    solver = SLEPcEigenSolver(A2,B)                     #[𝐾]{𝑈} = 𝜆[𝑀]{𝑈}
+    solver.parameters["problem_type"] = "gen_hermitian"
+    solver.parameters['spectral_transform'] = 'shift-and-invert'
+    solver.parameters['spectral_shift'] = 1e-14
+    solver.solve(number_of_requested_eigenpairs)
+    k = solver.get_number_converged()
+    
+    # PETScOptions.set("eps_monitor_all")                   # monitor bugs
+    from mf.plots import PlotSettingsSmall, get_axes_coord, ColorbarSettings
+    my_map = plt.get_cmap('seismic')
+    #%%
+    if which_eig == 'all':
+        nn = int(number_of_requested_eigenpairs/25)
+    else:
+        nn = 1
+    
+    for ifig in range(nn):
+        
+        fig,myax = plt.subplots(5,5)
+        fig.tight_layout(h_pad=0)
+        # PlotSettings(fig, ax)
+        cc =get_axes_coord(myax) 
+        
+        eig = Function(W)
+        eig_vec = eig.vector()
+        for jj in range(0,25):
+            nn = jj + ifig*25
+            r, c, rx, cx = solver.get_eigenpair(nn)
+            eig_vec[:] = rx
+            f = np.sqrt(np.real(r))/(2*np.pi)
+            ax = myax[cc[jj]]
+            
+            plt.sca(ax)
+            PlotSettingsSmall(fig, ax)
+            im = plot(eig, cmap=my_map, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(nn, f))
+            ax.set_aspect('equal', 'box')
+            plt.draw()
+            
+            if len(arg) !=0:
+                im.ax.set_aspect(arg[0])
+            
+            cb = plt.colorbar(im,  ax=ax)
+            ticklabs = cb.ax.get_yticklabels()
+            cb.ax.set_yticklabels(ticklabs, fontsize=7)
+
+
+def EigenSolvePlate(N, L_, w, u, v, rho, t, bcs_w):
+    F = derivative(L_, w, v)
+    J = derivative(F, w, u)
+       
+    K_ = PETScMatrix()
+    assemble(J, tensor = K_)
+    
+    L  = rho*t*inner(u,v)*dx
+    
+    M_ = PETScMatrix()
+    assemble(L, tensor = M_)
+    
+    # object is a list or not 
+    if isinstance(bcs_w, list): 
+        bcs_w  = bcs_w
+    else:        
+        bcs_w  = [bcs_w]
+        
+    for bcs in bcs_w:
+        bcs.apply(K_)
+        bcs.zero(M_)                                            # avoid spurius eig vals
+    
+    tt1 = time.time()
+    print('Computing %.f Modes' %N)           
+    solver = SLEPcEigenSolver(K_,M_)                            #[𝐾]{𝑈} = 𝜆[𝑀]{𝑈}
+    solver.parameters["solver"]             = "krylov-schur"
+    solver.parameters["problem_type"]       = "gen_hermitian"
+    solver.parameters['spectral_transform'] = 'shift-and-invert'
+    solver.parameters['spectral_shift']     = 1e-14
+    solver.solve(N)
+    k = solver.get_number_converged()
+    print(' %.f Modes have converged in %.2f secs!' %(k, time.time() - tt1))
+    
+    return solver
+    
 def AverageSigma():
     path = '/home/carlos/dataPython/sigma_mn/' 
      
