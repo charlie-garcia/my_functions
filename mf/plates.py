@@ -239,6 +239,7 @@ def ComplexPate(my_path, mesh_name, Lx, Ly, h1, loc_x, loc_y, plot_info):
     border_plate = [1,2,3,4]
     
     # all added circular of added mass
+    Nfx = len(loc_x)
     c      =  [0]*Nfx
     vertex, borders = ( [] for i in range(2))
     
@@ -302,7 +303,7 @@ def ComplexPate(my_path, mesh_name, Lx, Ly, h1, loc_x, loc_y, plot_info):
     
     if plot_info == 'plot':
         gmsh.fltk.run()
-        
+
     write_gmsh(my_path, mesh_name)
     
     gmsh.finalize()
