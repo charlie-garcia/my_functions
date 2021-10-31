@@ -523,6 +523,7 @@ def ComputeModesPlates(number_of_requested_eigenpairs, which_eig, J, W, w, w_t, 
 
 
 def EigenSolvePlate(N, L_, w, u, v, rho, t, bcs_w):
+    import time 
     F = derivative(L_, w, v)
     J = derivative(F, w, u)
        
