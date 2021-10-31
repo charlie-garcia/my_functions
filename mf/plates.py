@@ -515,14 +515,15 @@ def ComputeModesPlates(N, which_eig, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
 
             im = plot(eig, cmap=my_map, norm=norm, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(nn+1, f))
             ax.set_aspect('equal', 'box')
-            Lx = np.max(Vh.mesh().coordinates()[:,0]);          Ly = np.max(Vh.mesh().coordinates()[:,1])
-            plt.xticks([0, Lx]);   plt.yticks([0, Ly])
+            Lx = np.max(Vh.mesh().coordinates()[:,0]);          Lx0 = np.min(Vh.mesh().coordinates()[:,0]);          
+            Ly = np.max(Vh.mesh().coordinates()[:,1]);          Ly0 = np.min(Vh.mesh().coordinates()[:,1]);          
+            plt.xticks([Lx0, Lx]);   plt.yticks([Ly0, Ly])
             plt.draw()
             
             if len(arg) !=0:
                 im.ax.set_aspect(arg[0])
             
-            cb = plt.colorbar(im,  ax=ax)
+            cb = plt.colorbar(im,  ax=ax, ticks = [0])
 
         PlotSettings(fig, fig.axes)
 
