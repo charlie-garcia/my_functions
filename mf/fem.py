@@ -464,11 +464,7 @@ def SS_Plate(W, w_, mesh, E_, nu_, t_, force):
     #         (1.0/2.0)*(alpha/h)*inner(inner(theta_effective, n), inner(theta_effective, n))*ds(1) 
     
     # The remainder of the demo is as usual::
-    
-    f = Constant(force)
-    W_ext = f*w_*dx
-    
-    L = psi_M*dx - W_ext + L_CDG 
+    L = psi_M*dx + L_CDG 
     
     return L
 
