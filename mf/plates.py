@@ -1,6 +1,7 @@
 import gmsh, sys, meshio 
 import numpy as np
 from mf.fem import gmsh2dolfin, gmsh2dolfin_subd
+from fenics import *
 
 def CreatePlate(mesh_name, Lx, Ly, pxy, h1, dim, plot_info):
     # Mesh generation with GMSH
