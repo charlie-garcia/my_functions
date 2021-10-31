@@ -449,58 +449,53 @@ def SS_Plate(W, w_, mesh, E_, nu_, t_):
     
     return L
 
-def ComputeModesPlates(number_of_requested_eigenpairs, which_eig, J, W, w, w_t, rho, t, bcs_w, *arg):
+def ComputeModesPlates(N, which_eig, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
+    import time 
+    F = derivative(L_, w, v)
+    J = derivative(F, w, u)
+       
+    K_ = PETScMatrix()
+    assemble(J, tensor = K_)
     
-    a = J
-    A2 = PETScMatrix()
-    assemble(a, tensor = A2)
+    L  = rho*t*inner(u,v)*dx
     
-    # # element dkt kirchhoff - love
-    L = rho*t*inner(w,w_t)*dx
-    B = PETScMatrix()
-    assemble(L, tensor = B)
+    M_ = PETScMatrix()
+    assemble(L, tensor = M_)
     
-    # code to check whether 
     # object is a list or not 
     if isinstance(bcs_w, list): 
         bcs_w  = bcs_w
     else:        
         bcs_w  = [bcs_w]
         
-    for bc in bcs_w:
-        bc.apply(A2)
-        bc.zero(B)                          # avoid spurius eig vals
-    # u = Function(V)
-    
-    # px = 0.1
-    # py = 0
-    #PointSource(V, Point(px,py), f).apply(B)           # See how to use the delta function instead
-    
-    # solve(A, u.vector(), b)
-    solver = SLEPcEigenSolver(A2,B)                     #[𝐾]{𝑈} = 𝜆[𝑀]{𝑈}
-    solver.parameters["problem_type"] = "gen_hermitian"
+    for bcs in bcs_w:
+        bcs.apply(K_)
+        bcs.zero(M_) 
+
+    solver = SLEPcEigenSolver(K_,M_)         #[𝐾]{𝑈} = 𝜆[𝑀]{𝑈}
+    solver.parameters["problem_type"]       = "gen_hermitian"
     solver.parameters['spectral_transform'] = 'shift-and-invert'
-    solver.parameters['spectral_shift'] = 1e-14
-    solver.solve(number_of_requested_eigenpairs)
+    solver.parameters['spectral_shift']     = 1e-14
+    solver.solve(N)
     k = solver.get_number_converged()
     
     # PETScOptions.set("eps_monitor_all")                   # monitor bugs
-    from mf.plots import PlotSettingsSmall, get_axes_coord, ColorbarSettings
-    my_map = plt.get_cmap('seismic')
-    #%%
+    from mf.plots import PlotSettingsSmall, get_axes_coord, PlotSettings, MidpointNormalize
+    my_map = plt.get_cmap('RdBu')
+    
     if which_eig == 'all':
-        nn = int(number_of_requested_eigenpairs/25)
+        nn = int(N/25)
     else:
         nn = 1
     
     for ifig in range(nn):
         
-        fig,myax = plt.subplots(5,5)
+        fig, myax = plt.subplots(5,5)
         fig.tight_layout(h_pad=0)
         # PlotSettings(fig, ax)
         cc =get_axes_coord(myax) 
         
-        eig = Function(W)
+        eig = Function(Vh)
         eig_vec = eig.vector()
         for jj in range(0,25):
             nn = jj + ifig*25
@@ -510,17 +505,25 @@ def ComputeModesPlates(number_of_requested_eigenpairs, which_eig, J, W, w, w_t, 
             ax = myax[cc[jj]]
             
             plt.sca(ax)
-            PlotSettingsSmall(fig, ax)
-            im = plot(eig, cmap=my_map, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(nn, f))
+            # PlotSettingsSmall(fig, ax)
+
+            if np.abs(eig_vec.min())< 1e-10:
+                vvin = -eig_vec.max()
+            else:
+                vvin = eig_vec.min()
+            norm = MidpointNormalize(vmin=vvin, vmax=eig_vec.max(), midpoint=0)
+
+            im = plot(eig, cmap=my_map, norm=norm, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(nn+1, f))
             ax.set_aspect('equal', 'box')
+            plt.xticks([0, Lx]);   plt.yticks([0, Ly])
             plt.draw()
             
             if len(arg) !=0:
                 im.ax.set_aspect(arg[0])
             
             cb = plt.colorbar(im,  ax=ax)
-            ticklabs = cb.ax.get_yticklabels()
-            cb.ax.set_yticklabels(ticklabs, fontsize=7)
+
+        PlotSettings(fig, fig.axes)
 
 
 def EigenSolvePlate(N, L_, w, u, v, rho, t, bcs_w):

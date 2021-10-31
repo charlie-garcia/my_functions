@@ -30,14 +30,11 @@ def MatrixR32(rho0,c0,k0,A,rij):
     A = np.float32(A)
     AA  = A*A.T
     
-    # print('Compution ARM, freq %.f from %.f calculated' %( iif, lk ) )
     R = 2*rho0*c0*(k0**2)*AA /(np.pi)* ( sp.jv(1, (k0*ai) )/ (k0*ai))* ( sp.jv(1, (k0*ak) )/ (k0*ak))*  np.sin(k0*rij)/(k0*rij)
-
     Rii = rho0*c0*A* ( 1 - sp.jv(1, (2*k0*ai) ) /(k0*ai) )
     Rii[np.isnan(Rii)] = 0
     R[np.isnan(R)] = 0
     np.fill_diagonal(R, Rii)
-    
     R = np.real(R)
     
     return R
