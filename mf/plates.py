@@ -515,6 +515,7 @@ def ComputeModesPlates(N, which_eig, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
 
             im = plot(eig, cmap=my_map, norm=norm, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(nn+1, f))
             ax.set_aspect('equal', 'box')
+            Lx = np.max(fmesh.coordinates()[:,0]);          Ly = np.max(fmesh.coordinates()[:,1])
             plt.xticks([0, Lx]);   plt.yticks([0, Ly])
             plt.draw()
             
