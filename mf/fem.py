@@ -333,7 +333,7 @@ def getCentersTriangles(xx, yy, spl):
 #                           x[jj][0]* y[jj][2] - x[jj][1]* y[jj][0] + x[jj][2]* y[jj][1] ) /2 
 #     return cs, se
 
-def Clamped_Plate(W, w_, mesh, E_, nu_, t_, force, ds):
+def Clamped_Plate(W, w_, mesh, E_, nu_, t_, force, ds, tag_bords):
     # We take constant material properties throughout the domain::
     E = Constant(E_)
     nu = Constant(nu_)
@@ -392,14 +392,14 @@ def Clamped_Plate(W, w_, mesh, E_, nu_, t_, force, ds):
     # :math:`\mathcal{T}` where we would like to apply Dirichlet boundary conditions, or in UFL::
     
     theta_effective = theta - theta_d 
-    L_BC = -inner(inner(theta_effective, n), M_n)*ds(1) + \
-            (1.0/2.0)*(alpha/h)*inner(inner(theta_effective, n), inner(theta_effective, n))*ds(1) 
+    L_BC = -inner(inner(theta_effective, n), M_n)*ds(tag_bords) + \
+            (1.0/2.0)*(alpha/h)*inner(inner(theta_effective, n), inner(theta_effective, n))*ds(tag_bords) 
     
     # The remainder of the demo is as usual::
     L = psi_M*dx + L_CDG + L_BC   
     
     return L
-
+    
 def SS_Plate(W, w_, mesh, E_, nu_, t_, force):
    
     # We take constant material properties throughout the domain::
