@@ -213,7 +213,7 @@ def GetRandomPointExcitation(Npts, Lx, Ly, d2boundary, d2source):
     return px, py, circles
 
 
-def ComplexPate(my_path, mesh_name, Lx, Ly, h1, loc_x, loc_y):
+def ComplexPate(my_path, mesh_name, Lx, Ly, h1, loc_x, loc_y, plot_info):
     import gmsh, sys
     from mf.fem import write_gmsh
     from mf.fem import gmsh2dolfin
@@ -300,7 +300,9 @@ def ComplexPate(my_path, mesh_name, Lx, Ly, h1, loc_x, loc_y):
     tag_dom = gmsh.model.addPhysicalGroup(2, [rect])       # Delete original tag when fragment
     gmsh.model.setPhysicalName(2, tag_dom, surface_string_tag)   # dim, tag, name
     
-    gmsh.fltk.run()
+    if plot_info == 'plot':
+        gmsh.fltk.run()
+        
     write_gmsh(my_path, mesh_name)
     
     gmsh.finalize()
@@ -552,7 +554,7 @@ def EigenSolvePlate(N, L_, w, u, v, rho, t, bcs_w):
     print(' %.f Modes have converged in %.2f secs!' %(k, time.time() - tt1))
     
     return solver
-    
+
 def AverageSigma():
     path = '/home/carlos/dataPython/sigma_mn/' 
      
