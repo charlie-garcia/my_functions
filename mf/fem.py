@@ -333,7 +333,7 @@ def getCentersTriangles(xx, yy, spl):
 #                           x[jj][0]* y[jj][2] - x[jj][1]* y[jj][0] + x[jj][2]* y[jj][1] ) /2 
 #     return cs, se
 
-def Clamped_Plate(W, w_, mesh, E_, nu_, t_, force, ds, tag_bords):
+def Clamped_Plate(W, w_, mesh, E_, nu_, t_, ds, tag_bords):
     # We take constant material properties throughout the domain::
     E = Constant(E_)
     nu = Constant(nu_)
@@ -399,8 +399,8 @@ def Clamped_Plate(W, w_, mesh, E_, nu_, t_, force, ds, tag_bords):
     L = psi_M*dx + L_CDG + L_BC   
     
     return L
-    
-def SS_Plate(W, w_, mesh, E_, nu_, t_, force):
+
+def SS_Plate(W, w_, mesh, E_, nu_, t_):
    
     # We take constant material properties throughout the domain::
     E = Constant(E_)
