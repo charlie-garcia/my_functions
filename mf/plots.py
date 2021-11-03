@@ -432,7 +432,7 @@ def SetupPresentation(fontsize):
     rc('text', usetex=True)
     rc('xtick', labelsize=fontsize/1.2)
     rc('ytick', labelsize=fontsize/1.2)
-    rc('legend',fontsize=fontsize/2)
+    rc('legend',fontsize=fontsize/1.5)
 
     rcParams.update({
         'font.size': fontsize,
