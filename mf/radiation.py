@@ -93,3 +93,36 @@ def SigmaPlate_Analytical(Lx, Ly, N):
     clear_output()
     return f, sigma_mode, wm, sigma_mean, vqm
 
+def sigma_mn(Lx, Ly, k0, m,n):
+    from scipy.integrate import dblquad
+    
+    # limits for theta
+    t1 = 0
+    t2 = np.pi/2
+    
+    # limits for phi
+    p1 = 0
+    p2 = np.pi/2
+
+    def wallace(phi, theta):
+        alpha = k*Lx*np.sin(theta)*np.cos(phi)
+        beta  = k*Ly*np.sin(theta)*np.sin(phi)
+        if (m % 2) ==0 and (n % 2) ==0 :
+            return ( np.sin(alpha/2)*np.sin(beta/2) /  ( ( (alpha/(m*np.pi))**2-1)*((beta/(n*np.pi))**2-1) ))**2  * np.sin(theta)
+        elif (m % 2) ==0 :
+            return ( np.sin(alpha/2)*np.cos(beta/2) /  ( ( (alpha/(m*np.pi))**2-1)*((beta/(n*np.pi))**2-1) ))**2  * np.sin(theta)     
+        elif (n % 2) ==0 :
+            return ( np.cos(alpha/2)*np.sin(beta/2) /  ( ( (alpha/(m*np.pi))**2-1)*((beta/(n*np.pi))**2-1) ))**2  * np.sin(theta)
+        else :
+            return ( np.cos(alpha/2)*np.cos(beta/2) /  ( ( (alpha/(m*np.pi))**2-1)*((beta/(n*np.pi))**2-1) ))**2  * np.sin(theta)
+    
+    Nf = len(k0)
+    integral = np.zeros((Nf,))
+    
+    for iif in range(Nf):
+        print('Calculating %.f of %.f'%(iif, Nf))
+        k= k0[iif]
+        integral[iif] = dblquad(wallace,  t1, t2,
+                                lambda theta:   p1, lambda theta:   p2)[0]
+    
+    return 64*k0**2*Lx*Ly / (np.pi**6 * m**2 * n**2) * integral
