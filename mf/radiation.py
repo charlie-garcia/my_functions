@@ -93,9 +93,9 @@ def SigmaPlate_Analytical(Lx, Ly, N):
     clear_output()
     return f, sigma_mode, wm, sigma_mean, vqm
 
-def sigma_mn(Lx, Ly, k0, m,n):
+def Sigma_mn(Lx, Ly, k0, m,n):
     from scipy.integrate import dblquad
-    
+
     # limits for theta
     t1 = 0
     t2 = np.pi/2
