@@ -456,8 +456,7 @@ def SetupPaper(fontsize):
         'font.size': fontsize,
         "figure.facecolor":  "None",
         "axes.facecolor":    "None",
-        "savefig.facecolor": "None",
-        "legend.facecolor":  "None"
+        "savefig.facecolor": "None"
     })
 def set_axes_equal(ax):
     from mpl_toolkits.mplot3d import Axes3D
