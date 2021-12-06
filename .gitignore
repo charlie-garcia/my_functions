@@ -3,6 +3,7 @@
 /build
 /mf.egg-info
 mf/__pycache__/
+my_fenics/__pycache__/
 
 # Ignore logs
 logs
