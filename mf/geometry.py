@@ -243,7 +243,8 @@ def EllipticalMesh(path, mesh_name, Lx, Ly, h1, plot_info):
     if plot_info == 'plot':
         gmsh.fltk.run()                                             
     # Write mesh
-    write_gmsh(path,mesh_name)                                       
+    #write_gmsh(path,mesh_name)                                       
+    gmsh.write(path+mesh_name)                                       
     # Don't forget to finalize gmsh
     gmsh.finalize()  
 
