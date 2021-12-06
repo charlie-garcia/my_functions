@@ -523,9 +523,8 @@ def ComputeModesPlates(N, which_eig, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
             if len(arg) !=0:
                 im.ax.set_aspect(arg[0])
             
-            cb = plt.colorbar(im,  ax=ax, ticks = [0])
-
-        PlotSettings(fig, fig.axes)
+            im_ratio = np.min([Lx,Ly])/np.max([Lx,Ly])
+            cb = plt.colorbar(im,  ax=ax, ticks = [0],fraction=0.046*im_ratio, pad=0.05)
 
     return solver
 
@@ -592,8 +591,8 @@ def ComputeNModesPlates(m,n, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
 
         if len(arg) !=0:
             im.ax.set_aspect(arg[0])
-        
-        cb = plt.colorbar(im,  ax=ax, ticks = [0])
+        im_ratio = np.min([Lx,Ly])/np.max([Lx,Ly])
+        cb = plt.colorbar(im,  ax=ax, ticks = [0],fraction=0.046*im_ratio, pad=0.05)
     
     plt.show()
 
