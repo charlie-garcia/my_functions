@@ -116,3 +116,137 @@ def RectangularMesh(path, mesh_name, Lx,Ly, h, plot_info):
     fmesh, mf_boundary = gmsh2dolfin(path, mesh_name, '2D', bord_string_tag, surface_string_tag)            
 
     return fmesh, mf_boundary, tag_bords
+
+def PolygonalMesh(path, mesh_name, N, a, h1, plot_info):
+    
+    alpha = np.deg2rad(360/N)
+    phi = alpha/2+np.pi/2
+    beta = np.deg2rad(90) - alpha/2
+    b = np.sqrt( np.pi*a**2* np.sin(alpha/2) / (N * np.sin(beta)))
+    
+    l = 2*b*np.sin(beta)/np.sin(alpha/2)
+    area_t = 1/2*b*N*l
+    
+    # Create mesh
+    import gmsh, sys
+    from mf.fem import gmsh2dolfin, write_gmsh
+    # Mesh generation with GMSH
+    gmsh.initialize(sys.argv)
+    
+    # Ask GMSH to display information in the terminal
+    gmsh.option.setNumber("General.Terminal", 1)
+    gmsh.model.add(mesh_name)
+    
+    model = gmsh.model
+    model.add("MyPlate")
+    
+    R = np.sqrt(b**2+ (l/2)**2)
+    
+    # Create Polygon's coordinates
+    vertex, borders, ptA, ptB = ( [] for i in range(4))
+    
+    for jj in range(N):
+        vertex.append(model.geo.addPoint( R*np.cos(2*np.pi*jj/N - phi), R*np.sin(2*np.pi*jj/N- phi), 0, h1))
+    
+    # Create Point for the center of the circle
+    center = model.geo.addPoint(0,0,0, h1)
+    # Create 3 Points on the circle
+    n_arc = 3
+    points = []
+    for j in range(n_arc):
+      points.append(model.geo.addPoint(a*np.cos(2*np.pi*j/n_arc), a*np.sin(2*np.pi*j/n_arc), 0, h1))
+    
+    # Create 3 circle arc
+    borders2 = []
+    for j in range(n_arc):
+      borders2.append(model.geo.addCircleArc(points[j],center,points[(j+1)%n_arc]))
+    
+    for j in range(N):
+        if j < N:
+            borders.append(gmsh.model.geo.addLine(vertex[j-1],vertex[j]))
+    
+    # Curveloop and Surface
+    curveloop = model.geo.addCurveLoop(borders)
+    id_surface = model.geo.addPlaneSurface([curveloop])
+    
+    # This command is mandatory and synchronize CAD with GMSH Model. The less you launch it, the better it is for performance purpose
+    gmsh.model.geo.synchronize()
+    
+    # set algorithm "Packing of parallelograms" (experimental =9)
+    gmsh.model.mesh.setAlgorithm(2, id_surface, 9)
+    gmsh.option.setNumber('Mesh.MeshSizeFactor', h1)
+    gmsh.model.mesh.generate(2)                                 # 2D mesh
+    
+    # Bord phisical group
+    bord_string_tag = "my_bords"
+    tag_bords = gmsh.model.addPhysicalGroup(1, borders)         
+    gmsh.model.setPhysicalName(1, tag_bords, bord_string_tag)   # dim, tag, name
+    
+    # Surface phisical group
+    surface_string_tag = "my_surface"
+    tag_dom = gmsh.model.addPhysicalGroup(2, [id_surface])       # Delete original tag when fragment
+    gmsh.model.setPhysicalName(2, tag_dom, surface_string_tag)   # dim, tag, name
+    
+   # Comment/Uncomment to see the mesh in gmsh
+    if plot_info == 'plot':
+        gmsh.fltk.run()                                             
+    # Write mesh
+    write_gmsh(path,mesh_name)                                       
+    # Don't forget to finalize gmsh
+    gmsh.finalize()  
+
+    fmesh, mf_boundary = gmsh2dolfin(path, mesh_name, '2D', bord_string_tag, surface_string_tag)            
+
+    return fmesh, mf_boundary, tag_bords
+
+def EllipticalMesh(path, mesh_name, Lx, Ly, h1, plot_info):
+    # Create mesh
+    import gmsh, sys
+    from mf.fem import gmsh2dolfin, write_gmsh
+    # Mesh generation with GMSH
+    gmsh.initialize(sys.argv)
+    
+    # Ask GMSH to display information in the terminal
+    gmsh.option.setNumber("General.Terminal", 1)
+    gmsh.model.add(mesh_name)
+    factory = gmsh.model.occ
+    model = gmsh.model
+    model.add("MyPlate")
+    
+    borders = factory.addEllipse(0,0,0,Lx/2, Ly/2)
+    
+    # Curveloop and Surface
+    curveloop = factory.addCurveLoop([borders])
+    id_surface = factory.addPlaneSurface([curveloop])
+    
+    # sync changes
+    factory.synchronize()                                       
+    # create mesh
+    model.mesh.generate(2) 
+    
+    # set algorithm "Packing of parallelograms" (experimental =9)
+    gmsh.model.mesh.setAlgorithm(2, id_surface, 9)
+    gmsh.option.setNumber('Mesh.MeshSizeFactor', h1)
+    gmsh.model.mesh.generate(2)                                 # 2D mesh
+    
+    # Bord phisical group
+    bord_string_tag = "my_bords"
+    tag_bords = gmsh.model.addPhysicalGroup(1, [borders])         
+    gmsh.model.setPhysicalName(1, tag_bords, bord_string_tag)   # dim, tag, name
+    
+    # Surface phisical group
+    surface_string_tag = "my_surface"
+    tag_dom = gmsh.model.addPhysicalGroup(2, [id_surface])       # Delete original tag when fragment
+    gmsh.model.setPhysicalName(2, tag_dom, surface_string_tag)   # dim, tag, name
+    
+   # Comment/Uncomment to see the mesh in gmsh
+    if plot_info == 'plot':
+        gmsh.fltk.run()                                             
+    # Write mesh
+    write_gmsh(path,mesh_name)                                       
+    # Don't forget to finalize gmsh
+    gmsh.finalize()  
+
+    fmesh, mf_boundary = gmsh2dolfin(path, mesh_name, '2D', bord_string_tag, surface_string_tag)            
+
+    return fmesh, mf_boundary, tag_bords
