@@ -580,7 +580,7 @@ def ComputeNModesPlates(m,n, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
             vvin = eig_vec.min()
         norm = MidpointNormalize(vmin=vvin, vmax=eig_vec.max(), midpoint=0)
         
-        im = plot(eig,  wireframe = True, cmap=my_map, norm=norm, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(jj+1, f))
+        im = plot(eig, cmap=my_map, norm=norm, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(jj+1, f))
         ax.set_aspect('equal', 'box')
         
         Lx = np.round(np.max(Vh.mesh().coordinates()[:,0]),2);  Lx0 = np.round(np.min(Vh.mesh().coordinates()[:,0]),2);          
