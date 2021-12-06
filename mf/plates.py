@@ -527,6 +527,8 @@ def ComputeModesPlates(N, which_eig, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
 
         PlotSettings(fig, fig.axes)
 
+    return solver
+
 def ComputeNModesPlates(m,n, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
     import time 
     F = derivative(L_, w, v)
@@ -594,6 +596,8 @@ def ComputeNModesPlates(m,n, Vh, L_, w, u, v , rho, t, bcs_w, *arg):
         cb = plt.colorbar(im,  ax=ax, ticks = [0])
     
     plt.show()
+
+    return solver
     
 def EigenSolvePlate(N, L_, w, u, v, rho, t, bcs_w):
     import time 
