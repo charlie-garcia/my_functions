@@ -359,3 +359,29 @@ def write_gmsh(path, mesh_name):
     else:
         print ("Creating new file")
         gmsh.write(path+mesh_name)
+
+def PlotMode(solver, eig, ax, jj):
+    from mf.plots import MidpointNormalize
+    r, c, rx, cx = solver.get_eigenpair(jj)
+    eig.vector()[:] = rx
+    f = np.sqrt(np.real(r))/(2*np.pi)
+    
+    if np.abs(eig.vector()[:].min())< 1e-10:
+        vvin = -eig.vector()[:].max()
+    else:
+        vvin = eig.vector()[:].min()
+    norm = MidpointNormalize(vmin=vvin, vmax=eig.vector()[:].max(), midpoint=0)
+    
+    plt.sca(ax)
+    my_map = plt.get_cmap('RdBu')
+    im = plot(eig, cmap=my_map, norm=norm, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(jj+1, f))
+    ax.set_aspect('equal', 'box')
+    
+    Lx = np.round(np.max(Vh.mesh().coordinates()[:,0]),2);  Lx0 = np.round(np.min(Vh.mesh().coordinates()[:,0]),2);          
+    Ly = np.round(np.max(Vh.mesh().coordinates()[:,1]),2);  Ly0 = np.round(np.min(Vh.mesh().coordinates()[:,1]),2);          
+    plt.xticks([Lx0, Lx]);   plt.yticks([Ly0, Ly])
+
+    im_ratio = np.min([Lx,Ly])/np.max([Lx,Ly])
+    cb = plt.colorbar(im,  ax=ax, ticks = [0],fraction=0.046*im_ratio, pad=0.05)
+    
+    plt.show()
