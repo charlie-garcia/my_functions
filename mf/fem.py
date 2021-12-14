@@ -18,13 +18,13 @@ def fem2cart(V, u, mesh, npoints, offset):
     return X,Y,Z, xx, yy
 
 def fem2cart_ds(V, u, mesh, ds_cart):
-    
+
     nodal_values_u = u.vector()
     array_u = np.array(nodal_values_u)
     
     xx, yy = node2coord(V,mesh)
     npts_x = int((np.max(xx) - np.min(xx))/ds_cart )
-    npts_y = int((np.max(xx) - np.min(xx))/ds_cart)
+    npts_y = int((np.max(yy) - np.min(yy))/ds_cart)
     [X, Y] = np.meshgrid (np.linspace(np.min(xx), np.max(xx), npts_x),         
                          np.linspace(np.min(yy), np.max(yy), npts_y) )
     Z = inter.griddata(np.c_[xx,yy], array_u,(X,Y), method = 'cubic')
