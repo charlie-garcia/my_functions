@@ -17,6 +17,20 @@ def fem2cart(V, u, mesh, npoints, offset):
     
     return X,Y,Z, xx, yy
 
+def fem2cart_ds(V, u, mesh, ds_cart):
+    
+    nodal_values_u = u.vector()
+    array_u = np.array(nodal_values_u)
+    
+    xx, yy = node2coord(V,mesh)
+    npts_x = int((np.max(xx) - np.min(xx))/ds_cart )
+    npts_y = int((np.max(xx) - np.min(xx))/ds_cart)
+    [X, Y] = np.meshgrid (np.linspace(np.min(xx), np.max(xx), npts_x),         
+                         np.linspace(np.min(yy), np.max(yy), npts_y) )
+    Z = inter.griddata(np.c_[xx,yy], array_u,(X,Y), method = 'cubic')
+    
+    return X,Y,Z, xx, yy
+
 def node2coord(V, mesh):
     # Acces to coordinates
     n = V.dim()                                                                      
@@ -360,7 +374,8 @@ def write_gmsh(path, mesh_name):
         print ("Creating new file")
         gmsh.write(path+mesh_name)
 
-def PlotMode(solver, eig, ax, jj):
+def PlotMode(solver, Vh, ax, jj):
+    eig = Function(Vh)
     from mf.plots import MidpointNormalize
     r, c, rx, cx = solver.get_eigenpair(jj)
     eig.vector()[:] = rx
