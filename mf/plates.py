@@ -272,10 +272,19 @@ def ComplexPate(my_path, mesh_name, a_mass, Lx, Ly, h1, loc_x, loc_y, plot_info)
     gmsh.model.mesh.embed(0, vertex,  2, rect)             # dim =0, point in dim=2, surface
     gmsh.model.mesh.embed(1, borders, 2, rect)             # dim =1, curve in dim=2, surface  
     
+    # # Append conectric points to redefine mesh
+    # ixs = [3]
+    # vx_out  = []
+    # for ii in range(Nfx):
+    #     for jj in range(N):
+    #         for ix in ixs:
+    #             vx_out.append(model.occ.addPoint( ix*a_mass*np.cos(2*np.pi*jj/N - phi) + loc_x[ii],\
+    #                                               ix*a_mass*np.sin(2*np.pi*jj/N - phi) + loc_y[ii], 0, h1))
+    
     gmsh.model.occ.synchronize()
     # gmsh.model.mesh.embed(0, vx_out,  2, rect)              # dim =0, point in dim=2, surface
     
-    gmsh.model.mesh.setAlgorithm(2, rect, 8)             # algorithm "Packing of parallelograms" (experimental =9)
+    gmsh.model.mesh.setAlgorithm(2, rect, 9)             # algorithm "Packing of parallelograms" (experimental =9)
     gmsh.model.mesh.setSize(gmsh.model.getEntities(0), h1)
     # gmsh.option.setNumber('Mesh.MeshSizeMin', h1)
     gmsh.model.mesh.generate(2)                                 # 2D mesh
@@ -284,7 +293,14 @@ def ComplexPate(my_path, mesh_name, a_mass, Lx, Ly, h1, loc_x, loc_y, plot_info)
     line_string_tag = "border"                                  # all borders even inside
     tag_border = gmsh.model.addPhysicalGroup(1, border_plate+borders)
     gmsh.model.setPhysicalName(1, tag_border, line_string_tag)   # dim, tag, name
-        
+    
+    # Ponint zones phisical group
+    # tag_points = [0]*(Nfx)
+    # len0=2*N
+    # for ii in range(Nfx):
+    #     tag_points[ii] = gmsh.model.addPhysicalGroup(1, borders[len0*(ii):len0*(ii+1)])    
+    #     gmsh.model.setPhysicalName(1, tag_points[ii], line_string_tag)   # dim, tag, name
+    
     # Surface phisical group
     surface_string_tag = "surface"
     tag_dom = gmsh.model.addPhysicalGroup(2, [rect])       # Delete original tag when fragment
