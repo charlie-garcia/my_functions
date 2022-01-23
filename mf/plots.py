@@ -458,6 +458,21 @@ def SetupPaper(fontsize):
         "axes.facecolor":    "None",
         "savefig.facecolor": "None"
     })
+
+def SetupDoc(fontsize):
+    from matplotlib import rc, rcParams
+    # default_dpi = rcParams['figure.dpi']
+    rcParams['figure.dpi'] = 12.5*fontsize
+    rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+    rc('text', usetex=True)
+    rc('xtick', labelsize=fontsize)
+    rc('ytick', labelsize=fontsize)
+    rc('legend',fontsize=fontsize)
+
+    rcParams.update({
+        'font.size': fontsize
+    })
+
 def set_axes_equal(ax):
     from mpl_toolkits.mplot3d import Axes3D
     from matplotlib import cm
