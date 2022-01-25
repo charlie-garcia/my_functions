@@ -384,10 +384,10 @@ class MidpointNormalize(mpl.colors.Normalize):
 #     # plt.hold(False)
 #     plt.show()
 
-
+import mpld3
+from mpld3 import plugins, utils
 class HighlightLines(plugins.PluginBase):
-    import mpld3
-    from mpld3 import plugins, utils
+    
     # source : http://www.xavierdupre.fr/app/jupytalk/helpsphinx/notebooks/js_mpld3.html
 
     """A plugin to highlight lines on hover"""
