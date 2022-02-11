@@ -457,7 +457,8 @@ def SetupPaper(fontsize):
         'font.size': fontsize,
         "figure.facecolor":  "None",
         "axes.facecolor":    "None",
-        "savefig.facecolor": "None"
+        "savefig.facecolor": "None",
+        "legend.facecolor" : (1, 1, 1, 0.9)
     })
 
 def SetupDoc(fontsize):
@@ -471,7 +472,8 @@ def SetupDoc(fontsize):
     rc('legend',fontsize=fontsize)
 
     rcParams.update({
-        'font.size': fontsize
+        'font.size': fontsize,
+        "legend.facecolor" : (1, 1, 1, 0.9),
     })
 
 def set_axes_equal(ax):
