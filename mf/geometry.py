@@ -221,19 +221,18 @@ def EllipticalMesh(path, mesh_name, Lx, Ly, h1, plot_info):
     
     # sync changes
     factory.synchronize()                                       
-    # create mesh
-    model.mesh.generate(2) 
     
     # set algorithm "Packing of parallelograms" (experimental =9)
-    gmsh.model.mesh.setAlgorithm(2, id_surface, 9)
+    gmsh.model.mesh.setAlgorithm(2, id_surface, 9) # 8 creates the same mesh
     gmsh.option.setNumber('Mesh.MeshSizeFactor', h1)
+    gmsh.option.setNumber('Mesh.MeshSizeMax', h1/5)
     gmsh.model.mesh.generate(2)                                 # 2D mesh
     
     # Bord phisical group
     bord_string_tag = "my_bords"
     tag_bords = gmsh.model.addPhysicalGroup(1, [borders])         
     gmsh.model.setPhysicalName(1, tag_bords, bord_string_tag)   # dim, tag, name
-    
+
     # Surface phisical group
     surface_string_tag = "my_surface"
     tag_dom = gmsh.model.addPhysicalGroup(2, [id_surface])       # Delete original tag when fragment
