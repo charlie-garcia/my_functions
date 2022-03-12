@@ -2,6 +2,7 @@ import numpy as np
 from mf.plots import create_plate2D
 from mf.dcm import distance3, MatrixR
 from IPython.display import clear_output
+import scipy.special as sp
 
 def CreateIdMatrix(x,y):
     cc = [0]*x*y
@@ -93,7 +94,8 @@ def SigmaPlate_Analytical(Lx, Ly, N):
     clear_output()
     return f, sigma_mode, wm, sigma_mean, vqm
 
-def Sigma_mn(Lx, Ly, k0, m,n):
+# Radiation efficiency in a simply supported plate
+def sigma_mn(m,n,k0,Lx,Ly):
     from scipy.integrate import dblquad
 
     # limits for theta
@@ -126,3 +128,40 @@ def Sigma_mn(Lx, Ly, k0, m,n):
                                 lambda theta:   p1, lambda theta:   p2)[0]
     
     return 64*k0**2*Lx*Ly / (np.pi**6 * m**2 * n**2) * integral
+
+# Self radiation efficiency in pistons
+def sigma_11(ka):  # Beranek ApxII, eq1
+    # ka = k*a
+    return (1 - sp.jv(1, 2*ka)/ka)
+
+# Mutual radiation efficiency in pistons
+def sigma_12(k, a, d):
+    ka = k*a
+    kd = k*d
+
+    # Mutual Radiation Beranek
+    IM, IN = 10,10
+    try:
+        L = len(ka)
+    except:
+        L = len(kd)
+     
+    s12_mn = np.zeros((L, IM, IN))
+    
+    for m in range(IM):
+        for n in range(IN):            
+            s12_mn[:, m,n] = (ka/(kd))**(m+n)   \
+                            *np.sqrt(2/(kd))    \
+                            *sp.gamma(m+n+1/2)  \
+                            *sp.jv(m+1, ka)     \
+                            *sp.jv(n+1, ka)     \
+                            *sp.jv(m+n+1/2, kd) \
+                            /(sp.factorial(m)*sp.factorial(n))
+
+    return np.sum(np.sum(s12_mn, 1),1)
+
+# Radition efficiency simply supported radiator Greenspan
+def Zs(ka):
+    y = 2*ka
+    F1s = (10-y**2)*sp.jv(1,y) - 5*y*sp.jv(0,y) - y**3/8
+    return  1 - 96/((2*ka)**5) * F1s  
