@@ -135,7 +135,7 @@ def sigma_11(ka):  # Beranek ApxII, eq1
     return (1 - sp.jv(1, 2*ka)/ka)
 
 # Mutual radiation efficiency in pistons
-def sigma_12(k, a, d):
+def sigma_12a(k, a, d):
     ka = k*a
     kd = k*d
 
