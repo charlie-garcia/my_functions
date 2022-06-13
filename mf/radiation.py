@@ -159,6 +159,16 @@ def sigma_12a(k, a, d):
                             /(sp.factorial(m)*sp.factorial(n))
 
     return np.sum(np.sum(s12_mn, 1),1)
+
+def sigma_12(k, a, d):
+    # paper carlos
+    ka = k*a
+    kd = k*d
+    f1 =   sp.jv(1,ka)**2
+    f2 =  (a/d)*sp.jv(1,ka)*sp.jv(2,ka)*(1/kd - 1/np.tan(kd)) 
+    f3 = 3/4*(a/d)**2*sp.jv(2,ka)**2*( 3/(kd**2) - 3/(kd*np.tan(kd)) -1 )
+    return 2*np.sin(kd)/kd *(f1+f2+f3)
+
 def Rmn(m,n, Lx, Ly):
 # def Rmn(m,n,d):
     cc = [0]*m*n
@@ -228,7 +238,7 @@ def Rmn(m,n, Lx, Ly):
     R_pm = r_pm[r_pm != 0.]
     
     return R_pp, R_mm, R_pm, pm
-    
+
 def sigma_mnp(m,n,k0,Lx,Ly):
     a0 = np.sqrt((Lx/m)*(Ly/n)/np.pi)            # equivalent radius for same AREA (hypothesis, but simmetrization?)
     perimeter_circle = 2*np.pi*a0
