@@ -473,6 +473,9 @@ def SetupDoc(fontsize):
 
     rcParams.update({
         'font.size': fontsize,
+        "figure.facecolor":  "#dcdcdc",
+        "axes.facecolor":    "#dcdcdc",
+        "savefig.facecolor": "#dcdcdc",
         "legend.facecolor" : (1, 1, 1, 0.9),
     })
 
