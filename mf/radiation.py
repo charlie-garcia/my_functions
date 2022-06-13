@@ -159,6 +159,97 @@ def sigma_12a(k, a, d):
                             /(sp.factorial(m)*sp.factorial(n))
 
     return np.sum(np.sum(s12_mn, 1),1)
+def Rmn(m,n, Lx, Ly):
+# def Rmn(m,n,d):
+    cc = [0]*m*n
+    ii=0
+    for ix in range(0,m):
+        for iy in range(0,n):
+            cc[ii] = (ix,iy)
+            ii=ii+1
+    
+    # create coords Ids
+    coords = {}
+    for ii in range(len(cc)):
+        if cc[ii][0] == cc[ii][1]:
+            coords[ii] = [cc[ii], '+']
+        elif (cc[ii][0]+cc[ii][1]) % 2 ==0:
+            coords[ii] = [cc[ii], '+']
+            if cc[ii][1] == 0 and cc[ii][0] %2 != 0:
+                coords[ii] = [cc[ii], '-']
+        else:
+            coords[ii] = [cc[ii], '-']
+    
+    # Index of +- coordinates
+    idx_plus  = np.where([coords[i][1]=='+' for i in range(len(cc))])[0]
+    idx_minus = np.where([coords[i][1]=='-' for i in range(len(cc))])[0]
+    
+    Nplus  = len(idx_plus)
+    Nminus = len(idx_minus)
+    
+    r_pp = np.zeros((Nplus, Nplus))
+    r_mm = np.zeros((Nminus, Nminus))
+    r_pm = np.zeros((Nminus, Nplus))
+    
+    dx, dy = Lx/m, Ly/n
+    plus  = np.float32(np.array([coords[i][0] for i in idx_plus]) )
+    minus = np.float32(np.array([coords[i][0] for i in idx_minus]))
+    
+    pm = [plus, minus]
+    
+    if m>1 or n>1:
+        plus[:,0] = plus[:,0]*dx
+        plus[:,1] = plus[:,1]*dy
+        minus[:,0] = minus[:,0]*dx
+        minus[:,1] = minus[:,1]*dy
+    
+    def calculateDistance(array, point):
+        # x is a vector, y is a point
+        x1 = array[:,0]
+        y1 = array[:,1]
+        x2 = point[0]
+        y2 = point[1]
+        
+        dist = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        return dist
+    
+    for iim in range(len(plus)):
+        r_pp[iim,:] = calculateDistance(plus, plus[iim])
+    
+    for iim in range(len(minus)):
+        r_mm[iim,:] = calculateDistance(minus, minus[iim])
+    
+    for iim in range(len(minus)):
+        r_pm[iim,:] = calculateDistance(plus, minus[iim])
+    
+    # for ii in range
+    R_pp = r_pp[r_pp != 0.]
+    R_mm = r_mm[r_mm != 0.]
+    R_pm = r_pm[r_pm != 0.]
+    
+    return R_pp, R_mm, R_pm, pm
+    
+def sigma_mnp(m,n,k0,Lx,Ly):
+    a0 = np.sqrt((Lx/m)*(Ly/n)/np.pi)            # equivalent radius for same AREA (hypothesis, but simmetrization?)
+    perimeter_circle = 2*np.pi*a0
+    perimeter_complex   = 2*(Lx/m + Ly/n)
+
+    ratio = perimeter_circle/perimeter_complex     # correction
+    print(ratio)
+
+    # Plots
+    coef_piston_ss = 0.87
+    a = a0*coef_piston_ss*ratio**(3/5)
+
+    R_pp, R_mm, R_pm, coords_pm = Rmn(m,n, Lx, Ly)
+
+    mono      = (m*n)*sigma_11(k0*a).reshape(-1)    
+    dipole_plus  = np.sum([sigma_12(k0,a,di) for di in R_pp], 0)
+    dipole_minus = np.sum([sigma_12(k0,a,di) for di in R_mm], 0)
+    dipole_plus_minus = 2*np.sum([sigma_12(k0,a,di) for di in R_pm], 0)
+
+    multipole = (mono + dipole_plus + dipole_minus - dipole_plus_minus)/(m * n)
+    return multipole#, coords_pm, a
 
 # Radition efficiency simply supported radiator Greenspan
 def Zs(ka):

@@ -215,7 +215,7 @@ def GetRandomPointExcitation(Npts, Lx, Ly, d2boundary, d2source):
     return px, py, circles
 
 
-def ComplexPate(my_path, mesh_name, a_mass, Lx, Ly, h1, loc_x, loc_y, plot_info):
+def ComplexPlateMass(my_path, mesh_name, a_mass, Lx, Ly, h1, loc_x, loc_y, plot_info):
     import gmsh, sys
     from mf.fem import write_gmsh
     from mf.fem import gmsh2dolfin
