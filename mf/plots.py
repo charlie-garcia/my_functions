@@ -537,17 +537,17 @@ def color_dict(gradient):
 
 
 def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
-    ''' returns a gradient list of (n) colors between
+  ''' returns a gradient list of (n) colors between
     two hex colors. start_hex and finish_hex
     should be the full six-digit color string,
     inlcuding the number sign ("#FFFFFF") '''
-    # Starting and ending colors in RGB form
-    s = hex_to_RGB(start_hex)
-    f = hex_to_RGB(finish_hex)
-    # Initilize a list of the output colors with the starting color
-    RGB_list = [s]
-    # Calcuate a color at each evenly spaced value of t from 1 to n
-    for t in range(1, n):
+  # Starting and ending colors in RGB form
+  s = hex_to_RGB(start_hex)
+  f = hex_to_RGB(finish_hex)
+  # Initilize a list of the output colors with the starting color
+  RGB_list = [s]
+  # Calcuate a color at each evenly spaced value of t from 1 to n
+  for t in range(1, n):
     # Interpolate RGB vector for color at the current value of t
     curr_vector = [
       int(s[j] + (float(t)/(n-1))*(f[j]-s[j]))
@@ -556,4 +556,4 @@ def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
     # Add it to our list of output colors
     RGB_list.append(curr_vector)
 
-    return color_dict(RGB_list)
+  return color_dict(RGB_list)
