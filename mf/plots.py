@@ -526,7 +526,7 @@ def RGB_to_hex(RGB):
   return "#"+"".join(["0{0:x}".format(v) if v < 16 else
             "{0:x}".format(v) for v in RGB])
 
-  def color_dict(gradient):
+def color_dict(gradient):
   ''' Takes in a list of RGB sub-lists and returns dictionary of
     colors in RGB and hex form for use in a graphing function
     defined later on '''
