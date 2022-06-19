@@ -381,14 +381,16 @@ def PlotMode(solver, Vh, ax, jj):
     eig.vector()[:] = rx
     f = np.sqrt(np.real(r))/(2*np.pi)
     
-    if np.abs(eig.vector()[:].min())< 1e-10:
-        vvin = -eig.vector()[:].max()
-    else:
-        vvin = eig.vector()[:].min()
-    norm = MidpointNormalize(vmin=vvin, vmax=eig.vector()[:].max(), midpoint=0)
+    eig_min, eig_max = eig.vector()[:].min(), eig.vector()[:].max()
+    vvmin, vvmax =  eig_min, eig_max
+    
+    if np.isclose(eig_min, 0.) or np.isclose(eig_max, 0.) :
+        vvmin, vvmax = -np.abs((eig_min+eig_max)), np.abs((eig_min+eig_max))
+        
+    norm = MidpointNormalize(vmin=vvmin, vmax=vvmax, midpoint=0)
     
     plt.sca(ax)
-    my_map = plt.get_cmap('RdBu')
+    my_map = plt.get_cmap('RdBu_r')
     im = plot(eig, cmap=my_map, norm=norm, title=r'$\mathbf{Mode ~%.f}$'', %.2f Hz'%(jj+1, f))
     ax.set_aspect('equal', 'box')
     
