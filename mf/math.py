@@ -60,9 +60,4 @@ def InertiaMatrix(fmesh, rho):
     I[0][1] = Ixy
     I[1][0] = Ixy
     
-    # Get the eigenvalues adn eigenvectors
-    eig   = np.linalg.eig(I)
-    mode  = np.c_[eig[1][:,0], eig[1][:,1]]
-    lmbda = eig[0]
-
-    return I, x0, y0, mode, lmbda
+    return I, x0, y0
