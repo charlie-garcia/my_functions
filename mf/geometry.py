@@ -53,7 +53,8 @@ def CircularMesh(path, mesh_name, R, h, plot_info):
     if plot_info == 'plot':
         gmsh.fltk.run()                                             
     # Write mesh
-    write_gmsh(path,mesh_name)                                       
+    # write_gmsh(path,mesh_name)                                       
+    gmsh.write(path+mesh_name)                                       
     # Don't forget to finalize gmsh
     gmsh.finalize()  
 
@@ -109,7 +110,8 @@ def RectangularMesh(path, mesh_name, Lx,Ly, h, plot_info):
     if plot_info == 'plot':
         gmsh.fltk.run()                                             
     # Write mesh
-    write_gmsh(path,mesh_name)                                                                                                                  
+    # write_gmsh(path,mesh_name)   
+    gmsh.write(path+mesh_name)                                                                                                                                                      
     # Don't forget to finalize gmsh
     gmsh.finalize()  
 
@@ -191,7 +193,8 @@ def PolygonalMesh(path, mesh_name, N, a, h1, plot_info):
     if plot_info == 'plot':
         gmsh.fltk.run()                                             
     # Write mesh
-    write_gmsh(path,mesh_name)                                       
+    # write_gmsh(path,mesh_name)                                       
+    gmsh.write(path+mesh_name)                                       
     # Don't forget to finalize gmsh
     gmsh.finalize()  
 
