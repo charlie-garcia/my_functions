@@ -402,3 +402,5 @@ def PlotMode(solver, Vh, ax, jj):
     cb = plt.colorbar(im,  ax=ax, ticks = [0],fraction=0.046*im_ratio, pad=0.05)
     
     plt.show()
+
+    return f, eig
