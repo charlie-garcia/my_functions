@@ -150,18 +150,18 @@ def PolygonalMesh(path, mesh_name, N, a, h1, plot_info):
     for jj in range(N):
         vertex.append(model.geo.addPoint( R*np.cos(2*np.pi*jj/N - phi), R*np.sin(2*np.pi*jj/N- phi), 0, h1))
     
-    # Create Point for the center of the circle
-    center = model.geo.addPoint(0,0,0, h1)
-    # Create 3 Points on the circle
-    n_arc = 3
-    points = []
-    for j in range(n_arc):
-      points.append(model.geo.addPoint(a*np.cos(2*np.pi*j/n_arc), a*np.sin(2*np.pi*j/n_arc), 0, h1))
+    # # Create Point for the center of the circle
+    # center = model.geo.addPoint(0,0,0, h1)
+    # # Create 3 Points on the circle
+    # n_arc = 3
+    # points = []
+    # for j in range(n_arc):
+    #   points.append(model.geo.addPoint(a*np.cos(2*np.pi*j/n_arc), a*np.sin(2*np.pi*j/n_arc), 0, h1))
     
-    # Create 3 circle arc
-    borders2 = []
-    for j in range(n_arc):
-      borders2.append(model.geo.addCircleArc(points[j],center,points[(j+1)%n_arc]))
+    # # Create 3 circle arc
+    # borders2 = []
+    # for j in range(n_arc):
+    #   borders2.append(model.geo.addCircleArc(points[j],center,points[(j+1)%n_arc]))
     
     for j in range(N):
         if j < N:
@@ -253,3 +253,14 @@ def EllipticalMesh(path, mesh_name, Lx, Ly, h1, plot_info):
     fmesh, mf_boundary = gmsh2dolfin(path, mesh_name, '2D', bord_string_tag, surface_string_tag)            
 
     return fmesh, mf_boundary, tag_bords
+
+
+def polygon_perimeter(N,a):
+    alpha = np.deg2rad(360/N)
+    phi = alpha/2+np.pi/2
+    beta = np.deg2rad(90) - alpha/2
+    b = np.sqrt( np.pi*a**2* np.sin(alpha/2) / (N * np.sin(beta)))
+    l = 2*b*np.sin(beta)/np.sin(alpha/2)
+    area_t = 1/2*b*N*l
+    R = np.sqrt(b**2+ (l/2)**2)
+    return 2*N*R*np.sin(np.pi/N)
