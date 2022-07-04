@@ -226,7 +226,7 @@ def EllipticalMesh(path, mesh_name, Lx, Ly, h1, plot_info):
     factory.synchronize()                                       
     
     # set algorithm "Packing of parallelograms" (experimental =9)
-    gmsh.model.mesh.setAlgorithm(2, id_surface, 9) # 8 creates the same mesh
+    gmsh.model.mesh.setAlgorithm(2, id_surface, 8) # 9 problem paralellograms
     gmsh.option.setNumber('Mesh.MeshSizeFactor', h1)
     gmsh.option.setNumber('Mesh.MeshSizeMax', h1/5)
     gmsh.model.mesh.generate(2)                                 # 2D mesh
