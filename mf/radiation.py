@@ -202,10 +202,15 @@ def Rmn(m,n, Lx, Ly):
     r_pm = np.zeros((Nminus, Nplus))
     
     dx, dy = Lx/m, Ly/n
+    llx, lly = Lx/(2*m), Ly/(2*n)
+                    
     plus  = np.float32(np.array([coords[i][0] for i in idx_plus]) )
     minus = np.float32(np.array([coords[i][0] for i in idx_minus]))
     
     pm = [plus, minus]
+    if m==1 and n==1:
+        plus[:,0] = plus[:,0] + llx
+        plus[:,1] = plus[:,1] + lly
     
     if m>1 or n>1:
         plus[:,0] = plus[:,0]*dx
