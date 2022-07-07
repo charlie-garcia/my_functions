@@ -213,10 +213,10 @@ def Rmn(m,n, Lx, Ly):
         plus[:,1] = plus[:,1] + lly
     
     if m>1 or n>1:
-        plus[:,0] = plus[:,0]*dx
-        plus[:,1] = plus[:,1]*dy
-        minus[:,0] = minus[:,0]*dx
-        minus[:,1] = minus[:,1]*dy
+        plus[:,0] = plus[:,0]*dx + llx
+        plus[:,1] = plus[:,1]*dy + lly
+        minus[:,0] = minus[:,0]*dx + llx
+        minus[:,1] = minus[:,1]*dy + lly
     
     def calculateDistance(array, point):
         # x is a vector, y is a point
