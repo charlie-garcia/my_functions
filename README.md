@@ -39,12 +39,12 @@ mamba install -c conda-forge fenics
 
 #### Install some packages with mamba
 ```console
-mamba install -c conda-forge scikit-image matplotlib pandas pytables=3.6.1 numba
+mamba install -c conda-forge scikit-image matplotlib pandas pytables=3.6.1 numba pycairo
 ```
 
 #### Install some packages with pip
 ```console
-pip install gmsh==4.10 meshio==4.3.8 mpld3==0.5.2 scipy numpy notebook
+pip install gmsh==4.10 meshio==4.3.8 mpld3==0.5.2 scipy numpy notebook 
 ```
 
 #### If h5py is missing, try (inside the environement)
