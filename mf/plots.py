@@ -170,7 +170,7 @@ def ColorbarSettings(ax, cb, colorbar_label):
 
 def get_axes_coord(ax):
     if len(ax.shape)==1:
-        cc = np.arange(len(ax.shape))
+        cc = np.arange(ax.shape[0])
     else:
         ii=0
         Ni, Nj = ax.shape
