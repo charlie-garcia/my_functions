@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate as inter
 import matplotlib as mpl
+import matplotlib 
+matplotlib.use('QTCairo') # helps with pixel appearing bigger than the actually are in pdf viewers
 # from fenics import *
 
 def set_fontsize(N):
@@ -167,14 +169,16 @@ def ColorbarSettings(ax, cb, colorbar_label):
 
 
 def get_axes_coord(ax):
-    ii=0
-    Ni, Nj = ax.shape
-    # cc = np.zeros((Ni*Nj, 1))
-    cc = [0]*Ni*Nj
-    for ix in range(0,Ni):
-        for iy in range(0,Nj):
-            cc[ii] = (ix,iy)
-            ii=ii+1
+    if len(ax.shape)==1:
+        cc = np.arange(len(ax.shape))
+    else:
+        ii=0
+        Ni, Nj = ax.shape
+        cc = [0]*Ni*Nj
+        for ix in range(0,Ni):
+            for iy in range(0,Nj):
+                cc[ii] = (ix,iy)
+                ii=ii+1
     return cc
 
 def connect_squares2D_gui(x,y,N,idx,connect, plotInfo, ax):

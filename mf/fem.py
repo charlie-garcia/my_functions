@@ -108,8 +108,8 @@ def gmsh2dolfin(path, mesh_name, dim, bord_string_tag, surface_string_tag):
         mesh_new = meshio.Mesh(points=points, cells={cell_type: cells}, cell_data={my_tag:[cell_data]})
         return mesh_new
     
-    border_mesh_name_xdmf = "border_fmv.xdmf"
-    dom_mesh_name_xdmf = "domains_fmesh.xdmf"
+    border_mesh_name_xdmf = mesh_name[:-4]+"_border_fmv.xdmf"
+    dom_mesh_name_xdmf = mesh_name[:-4]+"_domains_fmesh.xdmf"
     
     line_border_mesh = create_mesh(my_mesh, "line", bord_string_tag, prune_z=set_prune_z)
     meshio.write(path + border_mesh_name_xdmf, line_border_mesh)
@@ -259,7 +259,27 @@ def gmsh2grid(path, mesh_name, bord_string_tag, surface_string_tag):
         infile.read(grid)
 
     return grid
+
+def ReadFenicsMesh(path, mesh_name, bord_string_tag):
+    # ! This does not return tag's boundary 
+    border_mesh_name_xdmf = mesh_name[:-4]+"_border_fmv.xdmf"
+    dom_mesh_name_xdmf = mesh_name[:-4]+"_domains_fmesh.xdmf"
+    fmesh = Mesh()
+    # plot(fmesh)
+    with XDMFFile(path + dom_mesh_name_xdmf) as infile:
+        infile.read(fmesh)
     
+    mvc = MeshValueCollection("size_t", fmesh, 1)
+    
+    with XDMFFile(path + border_mesh_name_xdmf) as infile:
+        print("Reading 1d line data into dolfin mvc")
+        infile.read(mvc, bord_string_tag)
+    
+    print("Constructing MeshFunction from MeshValueCollection")
+    mf = MeshFunction('size_t',fmesh, mvc)
+    
+    return fmesh, mf
+
 def connect_triangles_fem(V, u, mesh, element, plot_info):
     if element == 'dof':
         n = V.dim()                                                     # n nodes
