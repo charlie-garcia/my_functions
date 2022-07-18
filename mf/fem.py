@@ -280,6 +280,16 @@ def ReadFenicsMesh(path, mesh_name, bord_string_tag):
     
     return fmesh, mf
 
+def ReadFenicsMeshMoved(path, mesh_name):
+    # to use this, save the moved mesh with 
+    # mesh_name = 'some_name.msh9'
+    # File(path+mesh_name[:-4]+'_fmesh_moved.xml') << fmesh  # the moved mesh
+    # File(path+mesh_name[:-4]+'_mf_moved.xml') << mf        # the moved meshfunction
+
+    fmesh = Mesh(path+mesh_name[:-4]+'_fmesh_moved.xml')
+    mf_boundary = MeshFunction('size_t', fmesh, path+mesh_name[:-4]+'_mf_moved.xml')
+    return fmesh, mf_boundary
+
 def connect_triangles_fem(V, u, mesh, element, plot_info):
     if element == 'dof':
         n = V.dim()                                                     # n nodes
