@@ -6,6 +6,7 @@ def clean_env():
         get_ipython().magic('clear')
         get_ipython().magic('reset -f')
         plt.close('all')
+        plt.ion()
         
     except:
         pass
