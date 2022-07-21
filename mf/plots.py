@@ -465,6 +465,33 @@ def SetupPaper(fontsize):
         "legend.facecolor" : (1, 1, 1, 0.9)
     })
 
+def SetupPaperJSV(fontsize):
+    from matplotlib import rc, rcParams
+    # default_dpi = rcParams['figure.dpi']
+    rc('text', usetex=True)
+    rcParams['figure.dpi'] = 12.5*fontsize
+    rc('font', **{'family': 'serif', 
+                    'serif': ['Charter']}) 
+    rcParams['text.latex.preamble'] = r"\SetSymbolFont{letters}{bold}{OML}{cmm}{sb}{it}\DeclareSymbolFont{operators}{OT1}{cmss}{sb}{n}\DeclareSymbolFontAlphabet{\mathbf}{letters}\DeclareSymbolFontAlphabet{\mathcal}{symbols}\boldmath"
+
+    rc('xtick', labelsize=fontsize)
+    rc('xtick.major', width=1.2)
+    rc('xtick.minor', width=0.8)
+    rc('ytick.major', width=1.2)
+    rc('ytick.minor', width=0.8)
+    rc('axes', linewidth=1.2)
+    rc('ytick', labelsize=fontsize)    
+    rc('legend',fontsize=fontsize)
+
+    rcParams.update({
+        'font.size': fontsize,
+        # 'font.weight': 100,# Does not work!
+        "figure.facecolor":  "None",
+        "axes.facecolor":    "None",
+        "savefig.facecolor": "None",
+        "legend.facecolor" : (1, 1, 1, 0.9)
+    })
+
 def SetupDoc(fontsize):
     from matplotlib import rc, rcParams
     # default_dpi = rcParams['figure.dpi']
