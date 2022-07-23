@@ -588,3 +588,7 @@ def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
     RGB_list.append(curr_vector)
 
   return color_dict(RGB_list)
+
+def GetDefaultMPLColors():
+  print(plt.rcParams['axes.prop_cycle'].by_key()['color'])
+
